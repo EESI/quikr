@@ -3,27 +3,57 @@ import sys
 import scipy.optimize.nnls
 import scipy.sparse
 import numpy as np
-import scipy as sp
-from scipy.sparse import lil_matrix
-from scipy.sparse.linalg import spsolve
 from subprocess import *
 import argparse
 import platform
 
-def main(args):
+def main():
 
-    parser = argparse.ArgumentParser(description="An argparse example")
-    parser.add_argument("--trained", help="The trained matrix")
-    parser.add_argument("--fasta", help="input fasta file")
+    parser = argparse.ArgumentParser(description=
+    "Quikr returns the estimated frequencies of batcteria present when given a \
+     input FASTA file. \n \
+    A default trained matrix will be used if none is supplied \n \
+    You must supply a kmer and default lambda if using a custom trained \
+    matrix. ")
+
+    parser.add_argument("-f", "--fasta", help="path to a fasta file", required=True)
+    parser.add_argument("-t", "--trained-matrix", help="path to a custom trained matrix")
+    parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
+    parser.add_argument("-k", "--kmer", type=int, 
+        help="specifies which kmer to use, must be used with a custom trained database")
+
 
     args = parser.parse_args()
 
-    if args.trained== "install":
-        print "You asked for installation" 
-    else:
-        print "You asked for something other than installation"
+    # Do some basic sanity checks
 
-  
+    if not os.path.isfile(args.fasta):
+        parser.error( "Input fasta file not found")
+
+
+
+    # If we are using a custom trained matrix, we need to do some basic checks
+    if args.trained is not None:  
+
+        if args.kmer is None:
+            parser.error("A kmer is required when using a custom matrix")
+        else:
+          kmer = args.kmer
+
+        if args.lamb is None:
+            # use 10,000 as default Lambda
+            input_lambda = 10000
+
+    else:
+        trained_matrix_location = "trainset7_112011N6Aaux.mat"
+        input_lambda = 10000
+        kmer = 6
+
+    if not os.path.isfile(args.trained):
+        parser.error("custom trained matrix not be found")
+
+    xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
+        
     return 0
 
 def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
@@ -46,22 +76,26 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   # We use the count program to count ____
   if uname == "Linux" and os.path.isfile("./count-linux"):
     print "Detected Linux"
-    count_input = Popen(["count-linux", "-r " + kmer, "-1", "-u", input_fasta], stdout=PIPE) 
+    count_input = Popen(["count-linux", "-r " + kmer, "-1", "-u", input_fasta_location], stdout=PIPE) 
   elif uname == "Darwin" and os.path.isfile("./count-osx"):
     print "Detected Mac OS X" 
-    count_input = Popen(["count-osx", "-r 6", "-1", "-u", input_fasta], stdout=PIPE) 
+    count_input = Popen(["count-osx", "-r 6", "-1", "-u", input_fasta_location], stdout=PIPE) 
 
   
-  counts = np.loadtxt(count_input.stdout) # create a ndarray
-  counts = counts / np.sum(counts) # form a probablility vector from our counts
+  # load the output of our count program and form a probability vector from the counts  
+  counts = np.loadtxt(count_input.stdout) 
+  counts = counts / np.sum(counts) 
  
   counts = default_lambda * counts
 
   trained_matrix  = np.loadtxt(trained_matrix_location)
-   
-  xstar = nnls(trained_matrix, counts)
-  return 1
+  
+  # perform the non-negative least squares
+  xstar = scipy.optimize.nnls(trained_matrix, counts) 
+ 
+  xstar = xstar / sum(xstar) 
+  return xstar
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main())
