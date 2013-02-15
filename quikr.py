@@ -11,10 +11,10 @@ def main():
 
     parser = argparse.ArgumentParser(description=
     "Quikr returns the estimated frequencies of batcteria present when given a \
-     input FASTA file. \n \
+    input FASTA file. \n \
     A default trained matrix will be used if none is supplied \n \
     You must supply a kmer and default lambda if using a custom trained \
-    matrix. ")
+    matrix.")
 
     parser.add_argument("-f", "--fasta", help="path to a fasta file", required=True)
     parser.add_argument("-t", "--trained-matrix", help="path to a custom trained matrix")
@@ -30,8 +30,6 @@ def main():
     if not os.path.isfile(args.fasta):
         parser.error( "Input fasta file not found")
 
-
-
     # If we are using a custom trained matrix, we need to do some basic checks
     if args.trained is not None:  
 
@@ -43,7 +41,7 @@ def main():
         if args.lamb is None:
             # use 10,000 as default Lambda
             input_lambda = 10000
-
+    # If we aren't using a custom trained matrix, load in the defaults
     else:
         trained_matrix_location = "trainset7_112011N6Aaux.mat"
         input_lambda = 10000
