@@ -1,15 +1,9 @@
-""" 
-The Quikr Train Script
-"""
-
 import numpy as np
 import os
 import sys
 from subprocess import *
 import platform
 import argparse
-
-
 
 def main():
   """
@@ -22,7 +16,7 @@ def main():
     the quikr function. \n You must supply a kmer. \n ")
 
   parser.add_argument("-i", "--input", help="path to the database", required=True)
-  parser.add_argument("-i", "--output", help="path to output", required=True)
+  parser.add_argument("-o", "--output", help="path to output", required=True)
   parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use", required=True)
 
   args = parser.parse_args()
