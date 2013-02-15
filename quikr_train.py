@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import numpy as np
 import os
 import sys
@@ -36,22 +37,21 @@ def quikr_train(input_file_location, kmer):
   Takes a input fasta file, and kmer, returns a custom trained matrix
   """
 
-  
-  print "input fasta training file: " + input_file_location
-  print "kmer: " + kmer
+  kmer_file_name = str(kmer) + "mers.txt"
 
-  kmer_file_name = kmer + "mers.txt"
-  print kmer_file_name
+  if not os.path.isfile(kmer_file_name):
+    print "could not find kmer file" 
+    exit()
 
   
   uname = platform.uname()[0]
 
   if uname == "Linux": 
     print "Detected Linux"
-    input_file = Popen(["./probabilities-by-read-linux", kmer, input_file_location, kmer_file_name], stdout=PIPE) 
+    input_file = Popen(["./probabilities-by-read-linux", str(kmer), input_file_location, kmer_file_name], stdout=PIPE) 
   elif uname == "Darwin":
     print "Detected Mac OS X" 
-    input_file = Popen(["./probabilities-by-read-osx", kmer, input_file_location, kmer_file_name]) 
+    input_file = Popen(["./probabilities-by-read-osx", str(kmer), input_file_location, kmer_file_name]) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   matrix  = np.loadtxt(input_file.stdout)
@@ -59,7 +59,5 @@ def quikr_train(input_file_location, kmer):
 
   return normalized
   
-
-
 if __name__ == "__main__":
     sys.exit(main())

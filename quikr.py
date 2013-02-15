@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 import scipy.optimize.nnls
@@ -29,9 +30,12 @@ def main():
 
     if not os.path.isfile(args.fasta):
         parser.error( "Input fasta file not found")
-
+    
     # If we are using a custom trained matrix, we need to do some basic checks
-    if args.trained is not None:  
+    if args.trained_matrix is not None:  
+         
+        if not os.path.isfile(args.trained_matrix):
+            parser.error("custom trained matrix not be found")
 
         if args.kmer is None:
             parser.error("A kmer is required when using a custom matrix")
@@ -43,14 +47,10 @@ def main():
             input_lambda = 10000
     # If we aren't using a custom trained matrix, load in the defaults
     else:
-        trained_matrix_location = "trainset7_112011N6Aaux.mat"
+        trained_matrix_location = "output.npy"
         input_lambda = 10000
         kmer = 6
-
-    if not os.path.isfile(args.trained):
-        parser.error("custom trained matrix not be found")
-
-    xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
+        xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
         
     return 0
 
@@ -74,10 +74,10 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   # We use the count program to count ____
   if uname == "Linux" and os.path.isfile("./count-linux"):
     print "Detected Linux"
-    count_input = Popen(["count-linux", "-r " + kmer, "-1", "-u", input_fasta_location], stdout=PIPE) 
+    count_input = Popen(["./count-linux", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
   elif uname == "Darwin" and os.path.isfile("./count-osx"):
     print "Detected Mac OS X" 
-    count_input = Popen(["count-osx", "-r 6", "-1", "-u", input_fasta_location], stdout=PIPE) 
+    count_input = Popen(["count-osx", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
   
   # load the output of our count program and form a probability vector from the counts  
@@ -86,9 +86,11 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
  
   counts = default_lambda * counts
 
-  trained_matrix  = np.loadtxt(trained_matrix_location)
+  trained_matrix  = np.load(trained_matrix_location)
   
   # perform the non-negative least squares
+  # import pdb; pdb.set_trace()
+  counts = np.rot90(counts)
   xstar = scipy.optimize.nnls(trained_matrix, counts) 
  
   xstar = xstar / sum(xstar) 
