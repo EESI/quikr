@@ -1,25 +1,46 @@
-#from scipy.sparse import * 
+""" 
+The Quikr Train Script
+"""
+
 import numpy as np
+import os
 import sys
 from subprocess import *
 import platform
+import argparse
 
-# You can call this script independently, and will save the 
-# trained matrix as a numpy file.
-# example: python quikr-train.py input.fasta 6 trained_matrix.npy
 
-def main(argv):
-  input_file_location = argv[1]
-  kmer = argv[2]
-  output_file_location = argv[3]
+
+def main():
+  """
+  You can call this script independently, and will save the 
+  trained matrix as a numpy file.
+  example: python quikr-train.py input.fasta 6 trained_matrix.npy
+  """
+  parser = argparse.ArgumentParser(description=
+  " quikr_train returns a custom trained matrix that can be used with \
+    the quikr function. \n You must supply a kmer. \n ")
+
+  parser.add_argument("-i", "--input", help="path to the database", required=True)
+  parser.add_argument("-i", "--output", help="path to output", required=True)
+  parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use", required=True)
+
+  args = parser.parse_args()
+
+  if not os.path.isfile(args.input):
+    parser.error( "Input database not found")
 
   # call the quikr train function, save the output with np.save
-  matrix = quikr_train(argv[1], argv[2])
-  np.save(output_file_location, matrix)
+  matrix = quikr_train(args.input, args.kmer)
+
+  np.save(args.output, matrix)
 
   return 0
 
 def quikr_train(input_file_location, kmer):
+  """
+  Takes a input fasta file, and kmer, returns a custom trained matrix
+  """
 
   
   print "input fasta training file: " + input_file_location
@@ -47,4 +68,4 @@ def quikr_train(input_file_location, kmer):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main())
