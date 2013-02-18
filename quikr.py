@@ -33,6 +33,7 @@ def main():
     
     # If we are using a custom trained matrix, we need to do some basic checks
     if args.trained_matrix is not None:  
+        trained_matrix_location = args.trained_matrix
          
         if not os.path.isfile(args.trained_matrix):
             parser.error("custom trained matrix not be found")
@@ -50,8 +51,8 @@ def main():
         trained_matrix_location = "output.npy"
         input_lambda = 10000
         kmer = 6
-        xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
-        
+    xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
+    print xstar 
     return 0
 
 def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
@@ -90,7 +91,7 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   
   # perform the non-negative least squares
   # import pdb; pdb.set_trace()
-  counts = np.rot90(counts)
+  trained_matrix = np.rot90(trained_matrix)
   xstar = scipy.optimize.nnls(trained_matrix, counts) 
  
   xstar = xstar / sum(xstar) 
