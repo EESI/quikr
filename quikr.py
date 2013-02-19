@@ -52,6 +52,7 @@ def main():
         input_lambda = 10000
         kmer = 6
     xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
+    np.savetxt("python.csv", xstar, delimiter=",")
     print xstar 
     return 0
 
@@ -80,21 +81,27 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
     print "Detected Mac OS X" 
     count_input = Popen(["count-osx", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
+   
+
   
+
   # load the output of our count program and form a probability vector from the counts  
   counts = np.loadtxt(count_input.stdout) 
   counts = counts / np.sum(counts) 
- 
   counts = default_lambda * counts
 
-  trained_matrix  = np.load(trained_matrix_location)
-  
-  # perform the non-negative least squares
-  # import pdb; pdb.set_trace()
+
+  # loado our trained matrix
+  trained_matrix = np.load(trained_matrix_location)
   trained_matrix = np.rot90(trained_matrix)
-  xstar = scipy.optimize.nnls(trained_matrix, counts) 
- 
+
+  #form the k-mer sensing matrix
+  trained_matrix = trained_matrix * default_lambda;
+  
+  xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
+
   xstar = xstar / sum(xstar) 
+
   return xstar
 
 
