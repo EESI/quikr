@@ -18,6 +18,7 @@ def main():
     matrix.")
 
     parser.add_argument("-f", "--fasta", help="path to a fasta file", required=True)
+    parser.add_argument("-o", "--output", help="the path to write your probability vector (csv output)", required=True)
     parser.add_argument("-t", "--trained-matrix", help="path to a custom trained matrix")
     parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
     parser.add_argument("-k", "--kmer", type=int, 
@@ -52,7 +53,7 @@ def main():
         input_lambda = 10000
         kmer = 6
     xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
-    np.savetxt("python.csv", xstar, delimiter=",")
+    np.savetxt("args.output, xstar, delimiter=",")
     print xstar 
     return 0
 
