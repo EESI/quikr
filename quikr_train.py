@@ -16,9 +16,9 @@ def main():
   " quikr_train returns a custom trained matrix that can be used with \
     the quikr function. \n You must supply a kmer. \n ")
 
-  parser.add_argument("-i", "--input", help="path to the database", required=True)
-  parser.add_argument("-o", "--output", help="path to output", required=True)
-  parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use", required=True)
+  parser.add_argument("-i", "--input", help="training database of sequences (fasta format)", required=True)
+  parser.add_argument("-o", "--output", help="sensing matrix (text file)", required=True)
+  parser.add_argument("-k", "--kmer", type=int, help="kmer size (integer)", required=False, dtype=int)
 
   args = parser.parse_args()
 
@@ -29,7 +29,6 @@ def main():
   matrix = quikr_train(args.input, args.kmer)
 
   np.save(args.output, matrix)
-  np.savetxt("python.csv", matrix, delimiter=",")
 
   return 0
 
@@ -41,7 +40,7 @@ def quikr_train(input_file_location, kmer):
   kmer_file_name = str(kmer) + "mers.txt"
 
   if not os.path.isfile(kmer_file_name):
-    print "could not find kmer file" 
+    print "could not find kmer file"
     exit()
 
   
