@@ -84,8 +84,9 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
 
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
-  trained_matrix = np.transpose(trained_matrix);
+  trained_matrix = np.flipud(trained_matrix);
   trained_matrix = np.vstack((np.ones(trained_matrix.shape[1]), trained_matrix))
+
 
   xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
 

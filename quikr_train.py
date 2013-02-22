@@ -27,7 +27,6 @@ def main():
 
   # call the quikr train function, save the output with np.save
   matrix = quikr_train(args.input, args.kmer)
-  matrix = np.rot90(matrix)
 
   np.save(args.output, matrix)
   np.savetxt("python.csv", matrix, delimiter=",")
