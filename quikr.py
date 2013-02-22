@@ -49,12 +49,12 @@ def main():
             input_lambda = 10000
     # If we aren't using a custom trained matrix, load in the defaults
     else:
-        trained_matrix_location = "output.npy"
-        input_lambda = 10000
-        kmer = 6
+          trained_matrix_location = "output.npy"
+          input_lambda = 10000
+          kmer = 6
+    
     xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
-    np.savetxt("args.output, xstar, delimiter=",")
-    print xstar 
+    np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
 
 def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
@@ -82,26 +82,32 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
     print "Detected Mac OS X" 
     count_input = Popen(["count-osx", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
-   
-
-  
 
   # load the output of our count program and form a probability vector from the counts  
   counts = np.loadtxt(count_input.stdout) 
-  counts = counts / np.sum(counts) 
+  counts = counts / counts.sum(0) 
   counts = default_lambda * counts
+  print counts.shape
+  counts = np.concatenate([np.zeros(1), counts])
 
-
-  # loado our trained matrix
+  # load our trained matrix
   trained_matrix = np.load(trained_matrix_location)
-  trained_matrix = np.rot90(trained_matrix)
+
+  print counts.shape
+  print trained_matrix.shape
 
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
+
+  trained_matrix = np.transpose(trained_matrix);
+  trained_matrix = np.vstack((np.ones(trained_matrix.shape[1]), trained_matrix))
+  # trained_matrix = np.transpose(trained_matrix);
   
+  print trained_matrix.shape
+
   xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
 
-  xstar = xstar / sum(xstar) 
+  xstar = xstar / xstar.sum(0) 
 
   return xstar
 
