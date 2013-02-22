@@ -10,15 +10,16 @@ def main():
   """
   You can call this script independently, and will save the 
   trained matrix as a numpy file.
-  example: python quikr-train.py input.fasta 6 trained_matrix.npy
+  example: python quikr-train.py -i input.fasta -k 6 -o trained_matrix.npy
+ 
   """
   parser = argparse.ArgumentParser(description=
   " quikr_train returns a custom trained matrix that can be used with \
     the quikr function. \n You must supply a kmer. \n ")
 
-  parser.add_argument("-i", "--input", help="training database of sequences (fasta format)", required=True)
+  parser.add_argument("-i", "--input", help="training database of sequences (fasta format)", required=True)
   parser.add_argument("-o", "--output", help="sensing matrix (text file)", required=True)
-  parser.add_argument("-k", "--kmer", type=int, help="kmer size (integer)", required=False, dtype=int)
+  parser.add_argument("-k", "--kmer", type=int, help="kmer size (integer)", required=False )
 
   args = parser.parse_args()
 
