@@ -27,8 +27,10 @@ def main():
 
   # call the quikr train function, save the output with np.save
   matrix = quikr_train(args.input, args.kmer)
+  matrix = np.rot90(matrix)
 
   np.save(args.output, matrix)
+  np.savetxt("python.csv", matrix, delimiter=",")
 
   return 0
 
@@ -55,8 +57,9 @@ def quikr_train(input_file_location, kmer):
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   matrix  = np.loadtxt(input_file.stdout)
+  
+  matrix = np.rot90(matrix)
   normalized = matrix / matrix.sum(0)
-
   return normalized
   
 if __name__ == "__main__":
