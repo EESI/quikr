@@ -10,6 +10,7 @@ import platform
 
 def main():
 
+
     parser = argparse.ArgumentParser(description=
     "Quikr returns the estimated frequencies of batcteria present when given a \
     input FASTA file. \n \
@@ -17,43 +18,32 @@ def main():
     You must supply a kmer and default lambda if using a custom trained \
     matrix.")
 
-    parser.add_argument("-f", "--fasta", help="path to a fasta file", required=True)
-    parser.add_argument("-o", "--output", help="the path to write your probability vector (csv output)", required=True)
-    parser.add_argument("-t", "--trained-matrix", help="path to a custom trained matrix")
+    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
+    parser.add_argument("-o", "--output", help="output path (csv output)", required=True)
+    parser.add_argument("-t", "--trained-matrix", help="trained matrix", required=True)
     parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
-    parser.add_argument("-k", "--kmer", type=int, 
+    parser.add_argument("-k", "--kmer", type=int, required=True,
         help="specifies which kmer to use, must be used with a custom trained database")
 
 
     args = parser.parse_args()
+    
+    # our default lambda is 10,000
+    lamb = 10000
 
-    # Do some basic sanity checks
 
+    # Make sure our input exist
     if not os.path.isfile(args.fasta):
         parser.error( "Input fasta file not found")
-    
-    # If we are using a custom trained matrix, we need to do some basic checks
-    if args.trained_matrix is not None:  
-        trained_matrix_location = args.trained_matrix
-         
-        if not os.path.isfile(args.trained_matrix):
-            parser.error("custom trained matrix not be found")
 
-        if args.kmer is None:
-            parser.error("A kmer is required when using a custom matrix")
-        else:
-          kmer = args.kmer
-
-        if args.lamb is None:
-            # use 10,000 as default Lambda
-            input_lambda = 10000
-    # If we aren't using a custom trained matrix, load in the defaults
-    else:
-          trained_matrix_location = "output.npy"
-          input_lambda = 10000
-          kmer = 6
+    if not os.path.isfile(args.trained_matrix):
+        parser.error("custom trained matrix not found")
     
-    xstar = quikr(args.fasta, trained_matrix_location, kmer, input_lambda)
+    # use alternative lambda
+    if args.lamb is not None:
+        lamb = args.lamb
+    
+    xstar = quikr(args.fasta, args.trained_matrix, args.kmer, lamb)
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
 
@@ -87,23 +77,15 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   counts = np.loadtxt(count_input.stdout) 
   counts = counts / counts.sum(0) 
   counts = default_lambda * counts
-  print counts.shape
   counts = np.concatenate([np.zeros(1), counts])
 
   # load our trained matrix
   trained_matrix = np.load(trained_matrix_location)
 
-  print counts.shape
-  print trained_matrix.shape
-
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
-
   trained_matrix = np.transpose(trained_matrix);
   trained_matrix = np.vstack((np.ones(trained_matrix.shape[1]), trained_matrix))
-  # trained_matrix = np.transpose(trained_matrix);
-  
-  print trained_matrix.shape
 
   xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
 
