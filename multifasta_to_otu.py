@@ -20,7 +20,7 @@ def main():
 
 
     #do: write up the description
-    parser = argparse.ArgumentParser(description="MultifastaOTU"
+    parser = argparse.ArgumentParser(description="MultifastaOTU")
 
     parser.add_argument("-i", "--input", help="directory containing fasta files", required=True)
     parser.add_argument("-o", "--otu-table", help="otu_table", required=True)
