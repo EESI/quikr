@@ -66,8 +66,9 @@ def main():
     kmer = args.kmer
 
   fasta_list = os.listdir(args.input_directory)
-  pool = Pool(processes=jobs)
-  result = pool.map(quikr_call, fasta_list)
+
+  for fasta in fasta_list:
+    quikr_call(fasta)
 
   return 0
 
