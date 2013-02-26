@@ -67,17 +67,18 @@ def main():
 
   fasta_list = os.listdir(args.input_directory)
 
-  for fasta in fasta_list:
-    quikr_call(fasta)
+  pool = Pool(processes=jobs)
+  results = pool.map(quikr_call, fasta_list)
 
   return 0
 
 def quikr_call(fasta_file):
   inp = input_directory + fasta_file
   output = output_directory + os.path.basename(fasta_file)
+
   xstar = q.quikr(inp, trained_matrix, kmer, lamb)
   np.savetxt(output, xstar, delimiter=",", fmt="%f")
-  return 0
+  return xstar
 
 if __name__ == "__main__":
   sys.exit(main())
