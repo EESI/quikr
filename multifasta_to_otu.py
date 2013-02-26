@@ -53,9 +53,11 @@ def main():
 
     if args.kmer is not None:
         kmer = args.kmer
-    fasta_list = os.listdir(args.
-    pool = Pool(processes=jobs)
-    result = pool.map(quikr_call, fasta_list)
+    fasta_list = os.listdir(args.input_directory)
+
+    for fasta in fasta_list:
+       quikr_call(fasta)
+
     return 0
 
 def quikr_call(fasta_file):
@@ -63,6 +65,6 @@ def quikr_call(fasta_file):
   np.savetxt(output_directory + os.path.basename(fasta_file), xstar, delimiter=",", fmt="%f")
   return 0
 
- if __name__ == "__main__":
-     sys.exit(main())
+if __name__ == "__main__":
+  sys.exit(main())
  
