@@ -76,12 +76,16 @@ def main():
   results = pool.map(quikr_call, fasta_list)
 
   # Create a dictionary and load up our keys
-  
+  records = []
 
-  for fasta in fasta_list:
-    fasta_file = open(input_directory + fasta, "rU")
+  trained_matrix_headers = open(args.trained_matrix, "rU")
+  for record in SeqIO.parse(trained_matrix_headers, "fasta"):
+    records.append((record.id, 0))
 
-    for record in SeqIO.parse(fasta_file, "fasta") :
+  records = dict(records)
+
+
+
 
   # load the keys with values from each fasta result
 
