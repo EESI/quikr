@@ -29,7 +29,8 @@ def main():
 
   parser.add_argument("-i", "--input-directory", help="directory containing fasta files", required=True)
   parser.add_argument("-o", "--otu-table", help="otu_table", required=True)
-  parser.add_argument("-t", "--trained-matrix", help="otu_table", required=True)
+  parser.add_argument("-t", "--trained-matrix", help="your trained matrix ", required=True)
+  parser.add_argument("-f", "--trained-fasta", help="the fasta file used to train your matrix", required=True)
   parser.add_argument("-d", "--output-directory", help="quikr output directory", required=True)
   parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
   parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use, default=6")
@@ -72,22 +73,38 @@ def main():
   fasta_list = os.listdir(args.input_directory)
 
   # Queue up and run our quikr functions.
-  pool = Pool(processes=jobs)
-  results = pool.map(quikr_call, fasta_list)
+#  pool = Pool(processes=jobs)
+#  results = pool.map(quikr_call, fasta_list)
 
-  # Create a dictionary and load up our keys
+  # Create an array of headers
   records = []
-
-  trained_matrix_headers = open(args.trained_matrix, "rU")
+  trained_matrix_headers = open(args.trained_fasta, "rU")
   for record in SeqIO.parse(trained_matrix_headers, "fasta"):
-    records.append((record.id, 0))
+    records.append(record.id)
+  trained_matrix_headers.close()
 
-  records = dict(records)
-
-
-
+  final_output = np.zeros((len(records), len(fasta_list)))
+  print len(fasta_list)
 
   # load the keys with values from each fasta result
+  for fasta, fasta_it in map(None, fasta_list, range(len(fasta_list))):
+    fasta_file = open(input_directory + fasta, "rU")
+    sequences = list(SeqIO.parse(fasta_file, "fasta"))
+    number_of_sequences = len(sequences)
+    fasta_file.close()
+
+    print number_of_sequences
+    
+    proportions = np.loadtxt(output_directory + fasta);
+    for proportion, proportion_it in map(None, proportions, range(len(proportions))):
+     if(round(proportion * number_of_sequences) is not 0):
+        print str(fasta_it) + " " + str(proportion_it)
+        final_output[fasta_it, proportion_it] = proportion * number_of_sequences
+  
+  np.savetxt(args.otu_table, final_output, delimiter=",", fmt="%d")
+      
+
+
 
   # Write the otu table
   return 0
