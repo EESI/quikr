@@ -12,7 +12,6 @@ import platform
 # our defaults
 kmer = 6
 lamb = 10000
-trained_matrix = ""
 output_directory = ""
 input_directory = ""
 
@@ -64,6 +63,9 @@ def main():
 
   if args.kmer is not None:
     kmer = args.kmer
+
+  # Load trained matrix
+  trained_matrix = np.load(args.trained_matrix);
 
   fasta_list = os.listdir(args.input_directory)
 

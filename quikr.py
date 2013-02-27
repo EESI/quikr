@@ -85,9 +85,6 @@ def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
   counts = default_lambda * counts
   counts = np.concatenate([np.zeros(1), counts])
 
-  # load our trained matrix
-
-
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
   trained_matrix = np.flipud(trained_matrix);
