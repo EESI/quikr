@@ -47,7 +47,13 @@ def main():
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
 
-def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
+def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_location, kmer, default_lambda):
+  
+  trained_matrix = np.load(trained_matrix_location)
+  xstar = quikr(input_fasta_location, trained_matrix, kmer, default_lambda)
+  return xstar
+  
+def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
   """
   input_fasta is the input fasta file to find the estimated frequencies of
   trained_matrix is the trained matrix we are using to estimate the species
@@ -80,7 +86,7 @@ def quikr(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   counts = np.concatenate([np.zeros(1), counts])
 
   # load our trained matrix
-  trained_matrix = np.load(trained_matrix_location)
+
 
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
