@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from multiprocessing import Pool
+from Bio import SeqIO
 import multiprocessing
 import os
 import quikr_train as qt
@@ -54,7 +55,7 @@ def main():
   if not os.path.isfile(args.trained_matrix):
     parser.error("custom trained matrix not found")
     
-    # use alternative lambda
+  # use alternative lambda
   if args.lamb is not None:
     lamb = args.lamb
     
@@ -67,11 +68,24 @@ def main():
   # Load trained matrix
   trained_matrix = np.load(args.trained_matrix);
 
+  # Return a list of the input directory
   fasta_list = os.listdir(args.input_directory)
 
+  # Queue up and run our quikr functions.
   pool = Pool(processes=jobs)
   results = pool.map(quikr_call, fasta_list)
 
+  # Create a dictionary and load up our keys
+  
+
+  for fasta in fasta_list:
+    fasta_file = open(input_directory + fasta, "rU")
+
+    for record in SeqIO.parse(fasta_file, "fasta") :
+
+  # load the keys with values from each fasta result
+
+  # Write the otu table
   return 0
 
 def quikr_call(fasta_file):
