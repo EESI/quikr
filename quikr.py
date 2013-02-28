@@ -43,7 +43,7 @@ def main():
     if args.lamb is not None:
         lamb = args.lamb
     
-    xstar = quikr(args.fasta, args.trained_matrix, args.kmer, lamb)
+    xstar = quikr_load_trained_matrix_from_file(args.fasta, args.trained_matrix, args.kmer, lamb)
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
 
