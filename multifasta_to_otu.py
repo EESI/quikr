@@ -1,7 +1,9 @@
 #!/usr/bin/python
+
 from multiprocessing import Pool
 from Bio import SeqIO
 import multiprocessing
+from subprocess import *
 import os
 import quikr_train as qt
 import quikr as q
@@ -9,6 +11,7 @@ import sys
 import numpy as np
 import argparse
 import platform
+import csv
 
 # our defaults
 kmer = 6
@@ -73,48 +76,71 @@ def main():
   fasta_list = os.listdir(args.input_directory)
 
   # Queue up and run our quikr functions.
-#  pool = Pool(processes=jobs)
-#  results = pool.map(quikr_call, fasta_list)
+  pool = Pool(processes=jobs)
+  results = pool.map(quikr_call, fasta_list)
 
   # Create an array of headers
-  records = []
+  headers = []
   trained_matrix_headers = open(args.trained_fasta, "rU")
-  for record in SeqIO.parse(trained_matrix_headers, "fasta"):
-    records.append(record.id)
+  for header in SeqIO.parse(trained_matrix_headers, "fasta"):
+    headers.append(header.id)
   trained_matrix_headers.close()
 
-  final_output = np.zeros((len(records), len(fasta_list)))
-  print len(fasta_list)
+
+  output = np.zeros((len(headers), len(fasta_list)))
 
   # load the keys with values from each fasta result
   for fasta, fasta_it in map(None, fasta_list, range(len(fasta_list))):
-    fasta_file = open(input_directory + fasta, "rU")
-    sequences = list(SeqIO.parse(fasta_file, "fasta"))
-    number_of_sequences = len(sequences)
-    fasta_file.close()
 
-    print number_of_sequences
-    
+    count_sequences = Popen(["grep", "-c" ,"^>", args.input_directory + fasta], stdout=PIPE) 
+    number_of_sequences = int(count_sequences.stdout.readline())
+
     proportions = np.loadtxt(output_directory + fasta);
+    
     for proportion, proportion_it in map(None, proportions, range(len(proportions))):
-     if(round(proportion * number_of_sequences) is not 0):
-        print str(fasta_it) + " " + str(proportion_it)
-        final_output[fasta_it, proportion_it] = proportion * number_of_sequences
-  
-  np.savetxt(args.otu_table, final_output, delimiter=",", fmt="%d")
-      
+      output[proportion_it, fasta_it] = round(proportion * number_of_sequences)
 
+  # remove empty rows from our matrix
+  final_headers = list()
+  final_data = list()
+  for row, header in map(None, output, headers):
+    if row.sum() != 0:
+      final_headers.append(header)
+      final_data.append(row)
 
+  # convert from a list back into a numpy array
+  final_data = np.array(final_data, dtype=int)
 
-  # Write the otu table
+  # stack our final header and our output matrix
+  output = np.column_stack((final_headers, final_data))
+
+  # write our OTU table
+  output_file = open(args.otu_table, "wb") 
+  writer = csv.writer(output_file, delimiter="\t")
+
+  #write out our fasta file row
+  writer.writerow(['# QIIME vGail OTU table'])
+  fasta_row = ['#OTU_ID']
+  fasta_list
+  fasta_row.append(' '.join(fasta_list))
+  fasta_row = [' '.join(fasta_row)]
+  writer.writerow(fasta_row)
+
+  # write out our results
+  for i in range(1, np.shape(output)[0]):
+      writer.writerow(list(output[i]))
+
+  output_file.close()
+
   return 0
 
-def quikr_call(fasta_file):
-  inp = input_directory + fasta_file
-  output = output_directory + os.path.basename(fasta_file)
 
-  xstar = q.quikr(inp, trained_matrix, kmer, lamb)
-  np.savetxt(output, xstar, delimiter=",", fmt="%f")
+def quikr_call(fasta_file):
+  input_location = input_directory + fasta_file
+  output_location = output_directory + os.path.basename(fasta_file)
+
+  xstar = q.quikr(input_location, trained_matrix, kmer, lamb)
+  np.savetxt(output_location, xstar, delimiter=",", fmt="%f")
   return xstar
 
 if __name__ == "__main__":
