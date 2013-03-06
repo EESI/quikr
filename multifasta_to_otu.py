@@ -125,7 +125,7 @@ def main():
   writer.writerow(fasta_row)
 
   # write out our results
-  for i in range(1, np.shape(output)[0]):
+  for i in range(0, np.shape(output)[0]):
       writer.writerow(list(output[i]))
 
   output_file.close()
