@@ -55,11 +55,13 @@ def quikr_train(input_file_location, kmer):
     input_file = Popen(["./probabilities-by-read-osx", str(kmer), input_file_location, kmer_file_name]) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
+  # also do some fancy rotations so that it works properly with quikr
   matrix  = np.loadtxt(input_file.stdout)
   
   matrix = np.rot90(matrix)
-  normalized = matrix / matrix.sum(0)
-  return normalized
+  matrix = matrix / matrix.sum(0)
+  matrix = np.flipud(matrix);
+  return matrix
   
 if __name__ == "__main__":
     sys.exit(main())
