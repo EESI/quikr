@@ -37,7 +37,7 @@ def main():
         parser.error( "Input fasta file not found")
 
     if not os.path.isfile(args.trained_matrix):
-        parser.error("custom trained matrix not found")
+        parser.error("Custom trained matrix not found")
     
     # use alternative lambda
     if args.lamb is not None:
@@ -72,10 +72,8 @@ def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
 
   # We use the count program to count ____
   if uname == "Linux" and os.path.isfile("./count-linux"):
-    print "Detected Linux"
     count_input = Popen(["./count-linux", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
   elif uname == "Darwin" and os.path.isfile("./count-osx"):
-    print "Detected Mac OS X" 
     count_input = Popen(["count-osx", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
 
@@ -91,7 +89,6 @@ def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
 
 
   xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
-
   xstar = xstar / xstar.sum(0) 
 
   return xstar

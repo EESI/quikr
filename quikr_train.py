@@ -48,10 +48,8 @@ def quikr_train(input_file_location, kmer):
   uname = platform.uname()[0]
 
   if uname == "Linux": 
-    print "Detected Linux"
     input_file = Popen(["./probabilities-by-read-linux", str(kmer), input_file_location, kmer_file_name], stdout=PIPE) 
   elif uname == "Darwin":
-    print "Detected Mac OS X" 
     input_file = Popen(["./probabilities-by-read-osx", str(kmer), input_file_location, kmer_file_name]) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
