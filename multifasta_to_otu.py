@@ -5,7 +5,6 @@ from Bio import SeqIO
 import multiprocessing
 from subprocess import *
 import os
-import quikr_train as qt
 import quikr as q
 import sys
 import numpy as np
@@ -48,13 +47,13 @@ def main():
 
   # Make sure our input exist
   if not os.path.isdir(args.input_directory):
-    parser.error( "Input directory not found")
+    parser.error("Input directory not found")
 
   if not os.path.isdir(args.output_directory):
-    parser.error( "Input directory not found")
+    parser.error("Output directory not found")
 
   if not os.path.isdir(args.output_directory):
-    os.path.mkdir(args,output_directory)
+    os.path.mkdir(args, output_directory)
 
   if not os.path.isfile(args.trained_matrix):
     parser.error("custom trained matrix not found")
@@ -70,7 +69,7 @@ def main():
     kmer = args.kmer
 
   # Load trained matrix
-  trained_matrix = np.load(args.trained_matrix);
+  trained_matrix = np.load(args.trained_matrix)
 
   # Return a list of the input directory
   fasta_list = os.listdir(args.input_directory)
@@ -92,7 +91,7 @@ def main():
   # load the keys with values from each fasta result
   for fasta, fasta_it in map(None, fasta_list, range(len(fasta_list))):
 
-    count_sequences = Popen(["grep", "-c" ,"^>", args.input_directory + fasta], stdout=PIPE) 
+    count_sequences = Popen(["grep", "-c" , "^>", args.input_directory + fasta], stdout=PIPE) 
     number_of_sequences = int(count_sequences.stdout.readline())
 
     proportions = np.loadtxt(output_directory + fasta);
@@ -121,7 +120,6 @@ def main():
   #write out our fasta file row
   writer.writerow(['# QIIME vGail OTU table'])
   fasta_row = ['#OTU_ID']
-  fasta_list
   fasta_row.append(' '.join(fasta_list))
   fasta_row = [' '.join(fasta_row)]
   writer.writerow(fasta_row)
