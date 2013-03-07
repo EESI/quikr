@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import itertools
+import quikr
 import sys
 
-print '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=int(sys.argv[1])))
+print quikr.generate_kmers(int(sys.argv[1]))

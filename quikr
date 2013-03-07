@@ -1,0 +1,45 @@
+#!/usr/bin/python
+import sys
+import argparse
+import quikr
+
+def main():
+
+    parser = argparse.ArgumentParser(description=
+    "Quikr returns the estimated frequencies of batcteria present when given a \
+    input FASTA file. \n \
+    A default trained matrix will be used if none is supplied \n \
+    You must supply a kmer and default lambda if using a custom trained \
+    matrix.")
+
+    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
+    parser.add_argument("-o", "--output", help="output path (csv output)", required=True)
+    parser.add_argument("-t", "--trained-matrix", help="trained matrix", required=True)
+    parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
+    parser.add_argument("-k", "--kmer", type=int, required=True,
+        help="specifies which kmer to use, must be used with a custom trained database")
+
+
+    args = parser.parse_args()
+    
+    # our default lambda is 10,000
+    lamb = 10000
+
+    # Make sure our input exist
+    if not os.path.isfile(args.fasta):
+        parser.error( "Input fasta file not found")
+
+    if not os.path.isfile(args.trained_matrix):
+        parser.error("Custom trained matrix not found")
+    
+    # use alternative lambda
+    if args.lamb is not None:
+        lamb = args.lamb
+    
+    xstar = quikr_load_trained_matrix_from_file(args.fasta, args.trained_matrix, args.kmer, lamb)
+
+    np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

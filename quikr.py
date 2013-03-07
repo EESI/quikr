@@ -9,47 +9,56 @@ from subprocess import *
 import argparse
 import platform
 import gzip
+import itertools
 
-def main():
+def generate_kmers(kmer):
+  """ This will return a list of kmers seperated by newlines """
+  return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
 
-    parser = argparse.ArgumentParser(description=
-    "Quikr returns the estimated frequencies of batcteria present when given a \
-    input FASTA file. \n \
-    A default trained matrix will be used if none is supplied \n \
-    You must supply a kmer and default lambda if using a custom trained \
-    matrix.")
+def isCompressed(filename):
+  """ This function checks to see if the file is gzipped """ 
 
-    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
-    parser.add_argument("-o", "--output", help="output path (csv output)", required=True)
-    parser.add_argument("-t", "--trained-matrix", help="trained matrix", required=True)
-    parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
-    parser.add_argument("-k", "--kmer", type=int, required=True,
-        help="specifies which kmer to use, must be used with a custom trained database")
+  f = open(filename, "rb")
 
+  # The first two bytes of a gzipped file are always '1f 8b'
+  if f.read(2) == '\x1f\x8b':
+    f.close()
+    return True
+  else:
+    f.close()
+    return False
 
-    args = parser.parse_args()
-    
-    # our default lambda is 10,000
-    lamb = 10000
+  
+def quikr_train(input_file_location, kmer):
+  """
+  Takes a input fasta file, and kmer, returns a custom trained matrix
+  """
 
+  kmer_file_name = str(kmer) + "mers.txt"
 
-    # Make sure our input exist
-    if not os.path.isfile(args.fasta):
-        parser.error( "Input fasta file not found")
+  if not os.path.isfile(kmer_file_name):
+    print "could not find kmer file"
+    exit()
+  
+  uname = platform.uname()[0]
 
-    if not os.path.isfile(args.trained_matrix):
-        parser.error("Custom trained matrix not found")
-    
-    # use alternative lambda
-    if args.lamb is not None:
-        lamb = args.lamb
-    
-    xstar = quikr_load_trained_matrix_from_file(args.fasta, args.trained_matrix, args.kmer, lamb)
+  if uname == "Linux": 
+    input_file = Popen(["./probabilities-by-read-linux", str(kmer), input_file_location, kmer_file_name], stdout=PIPE) 
+  elif uname == "Darwin":
+    input_file = Popen(["./probabilities-by-read-osx", str(kmer), input_file_location, kmer_file_name]) 
 
-    np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
-    return 0
+  # load and  normalize the matrix by dividing each element by the sum of it's column.
+  # also do some fancy rotations so that it works properly with quikr
+  matrix  = np.loadtxt(input_file.stdout)
+  
+  matrix = np.rot90(matrix)
+  matrix = matrix / matrix.sum(0)
+  matrix = np.flipud(matrix);
+  return matrix
+
 
 def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_location, kmer, default_lambda):
+  """ This is a helper function to load our trained matrix and run quikr """
   
   if qu.isCompressed(trained_matrix_location):
     trained_matrix_file = gzip.open(trained_matrix_location, "rb")
@@ -60,7 +69,8 @@ def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_loc
 
   xstar = quikr(input_fasta_location, trained_matrix, kmer, default_lambda)
   return xstar
-  
+
+
 def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
   """
   input_fasta is the input fasta file to find the estimated frequencies of
@@ -74,6 +84,7 @@ def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
 
   In practice reconstruction is accurate only down to the genus level (not 
   species or strain).
+
   """
 
   uname = platform.uname()[0]
