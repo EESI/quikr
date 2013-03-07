@@ -5,7 +5,9 @@ from Bio import SeqIO
 import multiprocessing
 from subprocess import *
 import os
+import gzip
 import quikr as q
+import quikr_util as qu
 import sys
 import numpy as np
 import argparse
@@ -70,7 +72,12 @@ def main():
     kmer = args.kmer
 
   # Load trained matrix
-  trained_matrix = np.load(args.trained_matrix)
+  if qu.isCompressed(args.trained_matrix):
+    trained_matrix_file = gzip.open(args.trained_matrix, "rb")
+  else:
+    trained_matrix_file = open(args.trained_matrix, "rb")
+  
+  trained_matrix = np.load(trained_matrix_file)
 
   # Return a list of the input directory
   fasta_list = os.listdir(args.input_directory)

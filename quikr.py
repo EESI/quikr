@@ -52,7 +52,6 @@ def main():
 def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   
   if qu.isCompressed(trained_matrix_location):
-    print "compressed!"
     trained_matrix_file = gzip.open(trained_matrix_location, "rb")
   else:
     trained_matrix_file = open(trained_matrix_location, "rb")
