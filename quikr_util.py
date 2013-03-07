@@ -11,5 +11,3 @@ def isCompressed(filename):
   else:
     f.close()
     return False
- 
-
