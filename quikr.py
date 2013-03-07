@@ -4,12 +4,13 @@ import sys
 import scipy.optimize.nnls
 import scipy.sparse
 import numpy as np
+import quikr_util as qu
 from subprocess import *
 import argparse
 import platform
+import gzip
 
 def main():
-
 
     parser = argparse.ArgumentParser(description=
     "Quikr returns the estimated frequencies of batcteria present when given a \
@@ -44,12 +45,20 @@ def main():
         lamb = args.lamb
     
     xstar = quikr_load_trained_matrix_from_file(args.fasta, args.trained_matrix, args.kmer, lamb)
+
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
 
 def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_location, kmer, default_lambda):
   
-  trained_matrix = np.load(trained_matrix_location)
+  if qu.isCompressed(trained_matrix_location):
+    print "compressed!"
+    trained_matrix_file = gzip.open(trained_matrix_location, "rb")
+  else:
+    trained_matrix_file = open(trained_matrix_location, "rb")
+  
+  trained_matrix = np.load(trained_matrix_file)
+
   xstar = quikr(input_fasta_location, trained_matrix, kmer, default_lambda)
   return xstar
   

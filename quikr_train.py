@@ -2,6 +2,7 @@
 import numpy as np
 import os
 import sys
+import gzip
 from subprocess import *
 import platform
 import argparse
@@ -19,7 +20,10 @@ def main():
 
   parser.add_argument("-i", "--input", help="training database of sequences (fasta format)", required=True)
   parser.add_argument("-o", "--output", help="sensing matrix (text file)", required=True)
-  parser.add_argument("-k", "--kmer", type=int, help="kmer size (integer)", required=False )
+  parser.add_argument("-k", "--kmer", help="kmer size (integer)", 
+                      type=int, required=False )
+  parser.add_argument("-z", "--compress", help="compress output (integer)", 
+                      action='store_true', required=False)
 
   args = parser.parse_args()
 
@@ -29,7 +33,12 @@ def main():
   # call the quikr train function, save the output with np.save
   matrix = quikr_train(args.input, args.kmer)
 
-  np.save(args.output, matrix)
+  if args.compress: 
+    output_file = gzip.open(args.output, "wb")
+  else:
+    output_file = open(args.output, "wb")
+
+  np.save(output_file, matrix)
 
   return 0
 
