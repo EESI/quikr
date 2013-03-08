@@ -7,7 +7,6 @@ from subprocess import *
 import os
 import gzip
 import quikr as q
-import quikr_util as qu
 import sys
 import numpy as np
 import argparse
