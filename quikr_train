@@ -12,6 +12,7 @@ def main():
   """
   You can call this script independently, and will save the 
   trained matrix as a numpy file.
+
   example: python quikr-train.py -i input.fasta -k 6 -o trained_matrix.npy
  
   """
@@ -32,7 +33,7 @@ def main():
     parser.error( "Input database not found")
 
   # call the quikr train function, save the output with np.save
-  matrix = quikr.quikr_train(args.input, args.kmer)
+  matrix = quikr.train_matrix(args.input, args.kmer)
 
   if args.compress: 
     output_file = gzip.open(args.output, "wb")
