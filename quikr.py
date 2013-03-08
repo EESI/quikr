@@ -4,7 +4,6 @@ import sys
 import scipy.optimize.nnls
 import scipy.sparse
 import numpy as np
-import quikr_util as qu
 from subprocess import *
 import argparse
 import platform
@@ -29,7 +28,7 @@ def isCompressed(filename):
     return False
 
   
-def quikr_train(input_file_location, kmer):
+def train_matrix(input_file_location, kmer):
   """
   Takes a input fasta file, and kmer, returns a custom trained matrix
   """
@@ -57,21 +56,20 @@ def quikr_train(input_file_location, kmer):
   return matrix
 
 
-def quikr_load_trained_matrix_from_file(input_fasta_location, trained_matrix_location, kmer, default_lambda):
+def load_trained_matrix_from_file(trained_matrix_location):
   """ This is a helper function to load our trained matrix and run quikr """
   
-  if qu.isCompressed(trained_matrix_location):
+  if isCompressed(trained_matrix_location):
     trained_matrix_file = gzip.open(trained_matrix_location, "rb")
   else:
     trained_matrix_file = open(trained_matrix_location, "rb")
   
   trained_matrix = np.load(trained_matrix_file)
 
-  xstar = quikr(input_fasta_location, trained_matrix, kmer, default_lambda)
-  return xstar
+  return trained_matrix
 
 
-def quikr(input_fasta_location, trained_matrix, kmer, default_lambda):
+def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, default_lambda):
   """
   input_fasta is the input fasta file to find the estimated frequencies of
   trained_matrix is the trained matrix we are using to estimate the species
