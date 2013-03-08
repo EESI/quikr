@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import sys
+import os
 import argparse
 import quikr
+import numpy as np
 
 def main():
 
@@ -36,7 +38,8 @@ def main():
     if args.lamb is not None:
         lamb = args.lamb
     
-    xstar = quikr_load_trained_matrix_from_file(args.fasta, args.trained_matrix, args.kmer, lamb)
+    trained_matrix = quikr.load_trained_matrix_from_file(args.trained_matrix)
+    xstar = quikr.calculate_estimated_frequencies(args.fasta, trained_matrix, args.kmer, lamb)
 
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
