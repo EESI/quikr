@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import sys
+from StringIO import StringIO
 import scipy.optimize.nnls
 import scipy.sparse
 import numpy as np
@@ -11,12 +12,32 @@ import gzip
 import itertools
 
 def generate_kmers(kmer):
-  """ This will return a list of kmers seperated by newlines """
+  """ generate all possible kmers permutations seperated by newlines 
+
+ >>> kmers =  generate_kmers(1)
+ >>> generate_kmers(2)
+
+ param kmer: the desired Mer size
+ type  kmer: int
+ return: Returns a string of kmers seperated by newlines
+ rtype: string
+ """
+
   return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
 
 def isCompressed(filename):
-  """ This function checks to see if the file is gzipped """ 
+  """ This function checks to see if the file is gzipped
+  
+  >>> boolean_value = isCompressed("/path/to/compressed/gzip/file")
+  >>> print boolean_value
+  True
 
+  param filename: the filename to check
+  type  filename: string
+  return: Returns whether the file is gzipped
+  rtype: boolean
+
+  """
   f = open(filename, "rb")
 
   # The first two bytes of a gzipped file are always '1f 8b'
@@ -35,16 +56,8 @@ def train_matrix(input_file_location, kmer):
 
   kmer_file_name = str(kmer) + "mers.txt"
 
-  if not os.path.isfile(kmer_file_name):
-    print "could not find kmer file"
-    exit()
-  
-  uname = platform.uname()[0]
-
-  if uname == "Linux": 
-    input_file = Popen(["./probabilities-by-read-linux", str(kmer), input_file_location, kmer_file_name], stdout=PIPE) 
-  elif uname == "Darwin":
-    input_file = Popen(["./probabilities-by-read-osx", str(kmer), input_file_location, kmer_file_name]) 
+  kmer_output = Popen(["generate_kmers", str(kmer)], stdout=PIPE)
+  input_file = Popen(["probabilities-by-read", str(kmer), input_file_location] , stdout=PIPE) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   # also do some fancy rotations so that it works properly with quikr
@@ -103,7 +116,6 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
   #form the k-mer sensing matrix
   trained_matrix = trained_matrix * default_lambda;
   trained_matrix = np.vstack((np.ones(trained_matrix.shape[1]), trained_matrix))
-
 
   xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
   xstar = xstar / xstar.sum(0) 
