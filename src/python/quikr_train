@@ -24,7 +24,7 @@ def main():
   parser.add_argument("-o", "--output", help="sensing matrix (text file)", required=True)
   parser.add_argument("-k", "--kmer", help="kmer size (integer)", 
                       type=int, required=False )
-  parser.add_argument("-z", "--compress", help="compress output (integer)", 
+  parser.add_argument("-z", "--compress", help="compress output (flag)", 
                       action='store_true', required=False)
 
   args = parser.parse_args()
