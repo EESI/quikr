@@ -26,6 +26,9 @@ Quikr returns the estimated frequencies of batcteria present when given a
 input FASTA file. A default trained matrix will be used if none is supplied
 You must supply a kmer and default lambda if using a custom trained matrix.
 
+### Usage ###
+quikr returns the solution vector as a csv file.
+
 quikr's optional arguments:
   -f, --fasta, the fasta file sample
   -o, --output OUTPUT, the output path (csv output)
@@ -34,7 +37,7 @@ quikr's optional arguments:
   -k, --kmer, this specifies which kmer to use (default is 6)
 
 
-### Troubleshooting ###
+# Troubleshooting #
 
 If you are having trouble, and these solutions don't work. Please contact the
 developers with questions and issues.
