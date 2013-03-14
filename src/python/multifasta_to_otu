@@ -52,7 +52,7 @@ def main():
 
   if not os.path.isdir(args.output_directory):
     print "Output directory not found, creating directory"
-    os.path.mkdir(args, output_directory)
+    os.mkdir(args.output_directory)
 
   if not os.path.isfile(args.trained_matrix):
     parser.error("Custom trained matrix not found")
