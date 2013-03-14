@@ -145,7 +145,7 @@ def quikr_call(fasta_file):
   input_location = input_directory + fasta_file
   output_location = output_directory + os.path.basename(fasta_file)
 
-  xstar = q.quikr(input_location, trained_matrix, kmer, lamb)
+  xstar = q.calculate_estimated_frequencies(input_location, trained_matrix, kmer, lamb)
   np.savetxt(output_location, xstar, delimiter=",", fmt="%f")
   return xstar
 
