@@ -6,7 +6,6 @@ import scipy.optimize.nnls
 import scipy.sparse
 import numpy as np
 from subprocess import *
-import argparse
 import gzip
 import itertools
 
@@ -37,7 +36,11 @@ def isCompressed(filename):
   rtype: boolean
 
   """
-  f = open(filename, "rb")
+  try:
+    f = open(filename, "rb")
+  except IOError:
+    print "Warning: isCompressed could not find " + filename
+    return False
 
   # The first two bytes of a gzipped file are always '1f 8b'
   if f.read(2) == '\x1f\x8b':
@@ -116,7 +119,3 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
   xstar = xstar / xstar.sum(0) 
 
   return xstar
-
-
-if __name__ == "__main__":
-    sys.exit(main())
