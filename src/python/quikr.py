@@ -56,12 +56,15 @@ def train_matrix(input_file_location, kmer):
 
   kmer_file_name = str(kmer) + "mers.txt"
 
+  if not os.path.isfile(kmer_file_name):
+    print "could not find kmer file"
+    exit()
+
   input_file = Popen(["probabilities-by-read", str(kmer), input_file_location, kmer_file_name] , stdout=PIPE) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   # also do some fancy rotations so that it works properly with quikr
   matrix  = np.loadtxt(input_file.stdout)
-
   
   matrix = np.rot90(matrix)
   matrix = matrix / matrix.sum(0)
