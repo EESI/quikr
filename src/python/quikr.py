@@ -7,7 +7,6 @@ import scipy.sparse
 import numpy as np
 from subprocess import *
 import argparse
-import platform
 import gzip
 import itertools
 
@@ -100,15 +99,8 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
   species or strain).
 
   """
-
-  uname = platform.uname()[0]
-
-  # We use the count program to count ____
-  if uname == "Linux" and os.path.isfile("./count-linux"):
-    count_input = Popen(["./count-linux", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
-  elif uname == "Darwin" and os.path.isfile("./count-osx"):
-    count_input = Popen(["count-osx", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
-
+  # We use the count program to count 
+  count_input = Popen(["count-kmers", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
   # load the output of our count program and form a probability vector from the counts  
   counts = np.loadtxt(count_input.stdout) 
