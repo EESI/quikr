@@ -71,7 +71,7 @@ def main():
     kmer = args.kmer
 
   # Load trained matrix
-  if qu.isCompressed(args.trained_matrix):
+  if q.isCompressed(args.trained_matrix):
     trained_matrix_file = gzip.open(args.trained_matrix, "rb")
   else:
     trained_matrix_file = open(args.trained_matrix, "rb")
