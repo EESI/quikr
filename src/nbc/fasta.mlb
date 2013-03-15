@@ -1,0 +1,8 @@
+local
+	fasta-all.mlb
+in
+	signature FILE
+	signature FASTA
+	functor SingleSidedFasta
+	functor DoubleSidedFasta
+end

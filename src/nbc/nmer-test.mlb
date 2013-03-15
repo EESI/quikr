@@ -1,0 +1,9 @@
+local
+	local
+		nmer-all.mlb
+	in
+		functor Test
+	end
+in
+	test-generate.sml
+end

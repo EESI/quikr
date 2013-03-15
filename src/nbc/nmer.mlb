@@ -1,0 +1,7 @@
+local
+	nmer-all.mlb
+in
+	signature NMER
+	signature NMER_SIDES
+	functor Nmer
+end

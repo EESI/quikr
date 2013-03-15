@@ -1,0 +1,27 @@
+$(SML_LIB)/basis/basis.mlb
+$(SML_LIB)/basis/mlton.mlb
+$(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
+$(SML_LIB)/mlyacc-lib/mlyacc-lib.mlb
+fail.sml
+sequence.sml
+ann "allowFFI true" in
+	judy.sml
+	gzip.sml
+end
+substitution.grm.sig
+substitution.grm.sml
+substitution.lex.sml
+substitution.sml
+misc.sml
+options.sml
+storejudy.sml
+genome.sml
+nmer.sml
+kahan.sml
+score.sml
+binary.sml
+program.sml
+matlab.sml
+stopwatch.sml
+fasta.sml
+main.sml

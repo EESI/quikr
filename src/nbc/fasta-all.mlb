@@ -1,0 +1,8 @@
+local
+	$(SML_LIB)/basis/basis.mlb
+	nmer.mlb
+	parse-state.mlb
+	test-library.mlb
+in
+	fasta.sml
+end

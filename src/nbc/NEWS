@@ -1,0 +1,3 @@
+score and tabulate have been rewritten in Standard ML, to take advantage
+of certain optimizations that the MLton compiler performs, and improve
+performance. Their behavior should be unchanged, except for some speedup.

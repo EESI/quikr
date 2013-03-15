@@ -1,0 +1,114 @@
+This is the Naive Bayes Classifier, developed by the genomic signal
+processing lab led by Professor Gail Rosen at Drexel University.
+
+It uses a method similar to that used in many email spam filters to
+score a genetic sample against different genomes, to possibly identify
+the closest match. The method is described in the paper <>
+
+REQUIREMENTS
+
+To compile this code you need the following (versions given are the
+versions we used, but slightly older or newer versions probably work too):
+
+MLton 20100608
+GNU binutils 2.18.1
+GNU C Compiler 4.3.2
+GNU Make 3.81
+Judy 1.0.5
+zlib 1.2.3.3
+
+It has been tested extensively on Mac OS X and Linux, on both 32-bit
+and 64-bit processors. It probably works on other, similar operating
+systems without any changes. 64-bit uses more memory but also allows
+larger genomes to be used. No other differences between the 32-bit and
+64-bit versions have been observed. It may work on Windows, but that has
+not been attempted.
+
+Since it is now written in Standard ML, it may in theory be compilable
+with other Standard ML compilers, such as Standard ML of New Jersey,
+MLKit, PolyML, etc. We have not attempted this. Some changes would
+probably be necessary since the MLton foreign function interface (used
+for judy array and gzip support) is different from the interface used
+by other compilers.
+
+BUILDING
+
+For all the example commands, the $ indicates the shell prompt. Don't type
+the $, just everything after the $. And most of these examples should
+not be typed in verbatim (unless you happen to have the genomes for a
+unicorn and a wumpus lying around - in that case, lucky you!). Instead
+modify the examples to suit your particular circumstances.
+
+Run "make" to build:
+
+$ make
+
+Assuming it completes without any problems, you will have three
+programs: count, score, and tabulate. Install them somewhere in your path:
+
+$ cp count score tabulate /usr/local/bin
+
+SETUP
+
+The first step is to set up your genome data. Create a new directory,
+for example "genomes", and inside that directory, create a directory
+for each genome:
+
+$ mkdir genomes
+$ mkdir genomes/Unicorn
+$ mkdir genomes/Wumpus
+
+Then you run count on the FASTA files containing the genome (and any
+plasmids), for each word size you want to score against:
+
+$ count -w genomes/Unicorn/15perword.gz -t genomes/Unicorn/15total \
+	-r 15 Unicorn.fasta Unicorn_plasmid.fasta
+$ count -w genomes/Unicorn/13perword.gz -t genomes/Unicorn/13total \
+	-r 13 Unicorn.fasta Unicorn_plasmid.fasta
+$ count -w genomes/Wumpus/15perword.gz -t genomes/Wumpus/15total \
+	-r 15 Wumpus.fasta
+$ count -w genomes/Wumpus/13perword.gz -t genomes/Wumpus/13total \
+	-r 13 Wumpus.fasta
+
+SCORING
+
+Now, run score on your input file. Order 15 usually gives the best
+results so we'll try that first:
+
+$ score -a semen_sample.fasta -r 15 -j genomes
+
+For this example, you would get two files:
+	semen_sample-15-Unicorn.txt
+	semen_sample-15-Wumpus.txt
+
+TABULATION
+
+For easy import into a spreadsheet, you can run tabulate to put it in
+CSV format:
+
+$ tabulate semen_sample-15-Unicorn.txt semen_sample-15-Wumpus.txt
+
+This will create the files:
+	semen_sample-15-0.csv.gz
+	semen_sample-15-1.csv.gz
+	semen_sample-15-2.csv.gz
+and so on. The exact number of files will depend on how big your input
+file is.
+
+FURTHER INFORMATION
+
+Each command has a --help option, which may be helpful.
+
+BUGS
+
+count and score load the entire genome into memory. For large genomes this
+requires a stupendous amount of memory.
+
+LICENSE
+
+It has been licensed under the <> license.
+See the LICENSE file for details.
+
+FEEDBACK
+
+Any feedback should be directed to gailr@gmail.com.

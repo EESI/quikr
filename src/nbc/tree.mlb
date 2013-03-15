@@ -1,0 +1,6 @@
+local
+	$(SML_LIB)/basis/basis.mlb
+	stream.mlb
+in
+	tree.sml
+end

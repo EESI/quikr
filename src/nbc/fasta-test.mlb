@@ -1,0 +1,9 @@
+local
+	local
+		fasta-all.mlb
+	in
+		functor Test
+	end
+in
+	test-generate.sml
+end

@@ -1,0 +1,6 @@
+local
+	$(SML_LIB)/basis/basis.mlb
+	test-library.mlb
+in
+	nmer.sml
+end
