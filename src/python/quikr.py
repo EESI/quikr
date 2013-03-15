@@ -62,7 +62,7 @@ def train_matrix(input_file_location, kmer):
     print "could not find kmer file"
     exit()
 
-  input_file = Popen(["probabilities-by-read", str(kmer), input_file_location, kmer_file_name] , stdout=PIPE) 
+  input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   # also do some fancy rotations so that it works properly with quikr
