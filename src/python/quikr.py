@@ -56,12 +56,6 @@ def train_matrix(input_file_location, kmer):
   Takes a input fasta file, and kmer, returns a custom trained matrix
   """
 
-  kmer_file_name = str(kmer) + "mers.txt"
-
-  if not os.path.isfile(kmer_file_name):
-    print "could not find kmer file"
-    exit()
-
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
