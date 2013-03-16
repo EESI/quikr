@@ -23,10 +23,10 @@ def generate_kmers(kmer):
 
   return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
 
-def isCompressed(filename):
+def is_compressed(filename):
   """ This function checks to see if the file is gzipped
   
-  >>> boolean_value = isCompressed("/path/to/compressed/gzip/file")
+  >>> boolean_value = is_compressed("/path/to/compressed/gzip/file")
   >>> print boolean_value
   True
 
@@ -39,7 +39,7 @@ def isCompressed(filename):
   try:
     f = open(filename, "rb")
   except IOError:
-    print "Warning: isCompressed could not find " + filename
+    print "Warning: is_compressed could not find " + filename
     return False
 
   # The first two bytes of a gzipped file are always '1f 8b'
@@ -71,7 +71,7 @@ def train_matrix(input_file_location, kmer):
 def load_trained_matrix_from_file(trained_matrix_location):
   """ This is a helper function to load our trained matrix and run quikr """
   
-  if isCompressed(trained_matrix_location):
+  if is_compressed(trained_matrix_location):
     trained_matrix_file = gzip.open(trained_matrix_location, "rb")
   else:
     trained_matrix_file = open(trained_matrix_location, "rb")
