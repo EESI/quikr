@@ -57,9 +57,6 @@ def train_matrix(input_file_location, kmer):
   """
 
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
-  input_file.poll()
-  if input_file.returncode != 0:
-    raise ValueError, "probbilties-by-read did not execute properly"
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
   # also do some fancy rotations so that it works properly with quikr
@@ -102,9 +99,6 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
   # We use the count program to count 
   
   count_input = Popen(["count-kmers", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
-  count_input.poll()
-  if count_input.returncode != 0:
-    raise ValueError, "count-kmers did not execute properly"
 
   # load the output of our count program and form a probability vector from the counts  
   counts = np.loadtxt(count_input.stdout) 
