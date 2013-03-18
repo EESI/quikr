@@ -23,10 +23,10 @@ def generate_kmers(kmer):
 
   return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
 
-def isCompressed(filename):
+def is_compressed(filename):
   """ This function checks to see if the file is gzipped
   
-  >>> boolean_value = isCompressed("/path/to/compressed/gzip/file")
+  >>> boolean_value = is_compressed("/path/to/compressed/gzip/file")
   >>> print boolean_value
   True
 
@@ -39,7 +39,7 @@ def isCompressed(filename):
   try:
     f = open(filename, "rb")
   except IOError:
-    print "Warning: isCompressed could not find " + filename
+    print "Warning: is_compressed could not find " + filename
     return False
 
   # The first two bytes of a gzipped file are always '1f 8b'
@@ -56,12 +56,6 @@ def train_matrix(input_file_location, kmer):
   Takes a input fasta file, and kmer, returns a custom trained matrix
   """
 
-  kmer_file_name = str(kmer) + "mers.txt"
-
-  if not os.path.isfile(kmer_file_name):
-    print "could not find kmer file"
-    exit()
-
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
 
   # load and  normalize the matrix by dividing each element by the sum of it's column.
@@ -77,7 +71,7 @@ def train_matrix(input_file_location, kmer):
 def load_trained_matrix_from_file(trained_matrix_location):
   """ This is a helper function to load our trained matrix and run quikr """
   
-  if isCompressed(trained_matrix_location):
+  if is_compressed(trained_matrix_location):
     trained_matrix_file = gzip.open(trained_matrix_location, "rb")
   else:
     trained_matrix_file = open(trained_matrix_location, "rb")
@@ -103,6 +97,7 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
 
   """
   # We use the count program to count 
+  
   count_input = Popen(["count-kmers", "-r", str(kmer), "-1", "-u", input_fasta_location], stdout=PIPE) 
 
   # load the output of our count program and form a probability vector from the counts  
