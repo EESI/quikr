@@ -79,6 +79,9 @@ def main():
 
   # Return a list of the input directory
   fasta_list = os.listdir(args.input_directory)
+  
+  # Sort the list
+  fasta_list.sort()
 
   # Queue up and run our quikr functions.
   pool = Pool(processes=jobs)
@@ -100,7 +103,7 @@ def main():
     count_sequences = Popen(["grep", "-c" , "^>", args.input_directory + fasta], stdout=PIPE) 
     number_of_sequences = int(count_sequences.stdout.readline())
 
-    proportions = np.loadtxt(output_directory + fasta);
+    proportions = np.loadtxt(output_directory + "/" + fasta);
     
     for proportion, proportion_it in map(None, proportions, range(len(proportions))):
       number_of_reads[proportion_it, fasta_it] = round(proportion * number_of_sequences)
