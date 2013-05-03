@@ -2,4 +2,7 @@
 import quikr
 import sys
 
+if(len(sys.argv) < 2):
+  print "usage: generate_kmers KMER_SIZE"
+  exit(1)
 print quikr.generate_kmers(int(sys.argv[1]))
