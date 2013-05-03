@@ -14,6 +14,7 @@ accurate down to the genus level.
 ## How Do I Install Quikr ##
 Please read the directions on the [installation page](install.html).
 
+
 ## How Do I use Quikr ## 
 We have several ways to use quikr. There is a python module, command line
 scripts, and matlab scripts.
@@ -22,9 +23,10 @@ scripts, and matlab scripts.
 + [Python documentation](python.html)
 + [Command Line Utilities](cli.html)
 
+
 ## Contributors ##
 + David Koslicki
++ Simon Foucart
 + Gail Rosen
 + Calvin Morrison
 + Jean-Luc Bouchot
-
