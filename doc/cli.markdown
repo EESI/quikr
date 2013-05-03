@@ -8,7 +8,7 @@ module.
 ## Quikr\_train ##
 
 The quikr\_train is a tool to train a database for use with the quikr tool.
-Before running the quikr utility, you need to generate the trained matrix or
+Before running the quikr utility, you need to generate the sensing matrix or
 download a pretrained matrix from our database\_download.html.
 
 ### Usage ###
