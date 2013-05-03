@@ -14,18 +14,20 @@ def main():
     You must supply a kmer and default lambda if using a custom trained \
     matrix.")
 
-    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
-    parser.add_argument("-o", "--output", help="output path (csv output)", required=True)
-    parser.add_argument("-t", "--trained-matrix", help="trained matrix", required=True)
-    parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
+    parser.add_argument("-f", "--fasta", help="the sample's fasta file of NGS READS", required=True)
+    parser.add_argument("-o", "--output", help="OTU_FRACTION_PRESENT, a vector \ 
+    representing the percentage of database sequence's presence in a sequence. (csv output)", required=True)
+    parser.add_argument("-t", "--trained-matrix", help="the trained matrix", required=True)
+    parser.add_argument("-l", "--lamb", type=int, help="the lambda size. (default is 10,000")
     parser.add_argument("-k", "--kmer", type=int, required=True,
-        help="specifies which kmer to use, must be used with a custom trained database")
-
+        help="specifies the size of the kmer to use (the default is 6)")
 
     args = parser.parse_args()
     
     # our default lambda is 10,000
     lamb = 10000
+    # our default kmer size is 6
+    kmer = 6
 
     # Make sure our input exist
     if not os.path.isfile(args.fasta):
@@ -38,8 +40,12 @@ def main():
     if args.lamb is not None:
         lamb = args.lamb
     
+    # use alternative kmer
+    if args.kmer is not None:
+        kmer = args.kmer
+
     trained_matrix = quikr.load_trained_matrix_from_file(args.trained_matrix)
-    xstar = quikr.calculate_estimated_frequencies(args.fasta, trained_matrix, args.kmer, lamb)
+    xstar = quikr.calculate_estimated_frequencies(args.fasta, trained_matrix, kmer, lamb)
 
     np.savetxt(args.output, xstar, delimiter=",", fmt="%f")
     return 0
