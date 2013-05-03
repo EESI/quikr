@@ -21,8 +21,8 @@ def main():
     the quikr function. \n You must supply a kmer. \n ")
 
   parser.add_argument("-i", "--input", help="training database of sequences (fasta format)", required=True)
-  parser.add_argument("-o", "--output", help="sensing matrix (text file)", required=True)
-  parser.add_argument("-k", "--kmer", help="kmer size (integer)", 
+  parser.add_argument("-o", "--output", help="trained matrix (text file)", required=True)
+  parser.add_argument("-k", "--kmer", help="kmer size, default size is 6)", 
                       type=int, required=False )
   parser.add_argument("-z", "--compress", help="compress output (flag)", 
                       action='store_true', required=False)
