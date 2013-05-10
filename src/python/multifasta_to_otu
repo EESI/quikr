@@ -34,7 +34,6 @@ def main():
   parser.add_argument("-o", "--otu-table", help="otu_table", required=True)
   parser.add_argument("-t", "--trained-matrix", help="your trained matrix ", required=True)
   parser.add_argument("-f", "--trained-fasta", help="the fasta file used to train your matrix", required=True)
-  parser.add_argument("-d", "--output-directory", help="quikr output directory", required=True)
   parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
   parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use, default=6")
   parser.add_argument("-j", "--jobs", type=int, help="specifies how many jobs to run at once, default=number of CPUs")
@@ -44,15 +43,10 @@ def main():
   jobs = multiprocessing.cpu_count()
   trained_matrix = args.trained_matrix
   input_directory = args.input_directory
-  output_directory = args.output_directory
 
   # Make sure our input exist
   if not os.path.isdir(args.input_directory):
     parser.error("Input directory not found")
-
-  if not os.path.isdir(args.output_directory):
-    print "Output directory not found, creating directory"
-    os.mkdir(args.output_directory)
 
   if not os.path.isfile(args.trained_matrix):
     parser.error("Custom trained matrix not found")
@@ -109,7 +103,7 @@ def main():
     count_sequences = Popen(["grep", "-c" , "^>", fasta], stdout=PIPE) 
     number_of_sequences = int(count_sequences.stdout.readline())
 
-    proportions = np.loadtxt(output_directory + "/" + os.path.basename(fasta));
+    proportions = results[fasta_it]
     
     for proportion, proportion_it in map(None, proportions, range(len(proportions))):
       number_of_reads[proportion_it, fasta_it] = round(proportion * number_of_sequences)
@@ -135,6 +129,9 @@ def main():
   #write out our fasta file row
   writer.writerow(['# QIIME vGail OTU table'])
 
+  for fasta, it, in map(None, fasta_list, range(len(fasta_list))):
+    fasta_list[it] = os.path.basename(fasta)
+
   fasta_row = ['#OTU_ID']
   fasta_row.append(' '.join(fasta_list))
   fasta_row = [' '.join(fasta_row)]
@@ -150,10 +147,8 @@ def main():
 
 def quikr_call(fasta_file):
   print os.path.basename(fasta_file)
-  output_location = output_directory + "/" + os.path.basename(fasta_file)
 
   xstar = q.calculate_estimated_frequencies(fasta_file, trained_matrix, kmer, lamb)
-  np.savetxt(output_location, xstar, delimiter=",", fmt="%f")
   return xstar
 
 if __name__ == "__main__":
