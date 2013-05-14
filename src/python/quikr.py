@@ -8,19 +8,7 @@ from subprocess import *
 import gzip
 import itertools
 
-def generate_kmers(kmer):
-  """ generate all possible kmers permutations seperated by newlines 
 
- >>> kmers =  generate_kmers(1)
- >>> generate_kmers(2)
-
- param kmer: the desired Mer size
- type  kmer: int
- return: Returns a string of kmers seperated by newlines
- rtype: string
- """
-
-  return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
 
 def is_compressed(filename):
   """ This function checks to see if the file is gzipped
@@ -48,7 +36,6 @@ def is_compressed(filename):
   else:
     f.close()
     return False
-
   
 def train_matrix(input_file_location, kmer):
   """
