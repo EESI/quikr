@@ -1,7 +1,6 @@
 # Quikr #
 This is the homepage for quikr.
 
-
 ## What is Quikr ##
 Quikr is a QUadratic, Iterative, K-mer based Reconstruction technique that
 utilizes sparsity promoting ideas from the field of compressed sensing to
@@ -23,6 +22,8 @@ scripts, and matlab scripts.
 + [Python documentation](python.html)
 + [Command Line Utilities](cli.html)
 
+## Contact ##                                   
+For issues with the python implementation, contact gailro@gmail.com
 
 ## Contributors ##
 + David Koslicki

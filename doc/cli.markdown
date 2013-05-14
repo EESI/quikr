@@ -73,7 +73,6 @@ multifasta\_to\_otu's arguments:
   OTU's)
   -t, --trained-matrix, the trained matrix
   -f, --trained-fasta, the fasta file database of sequences
-  -d, --output-directory, quikr output directory
   -l, --lamb, specify what size of lambda to use (the default value is 10,000)
   -k, --kmer, specify what size of kmer to use, (default value is 6)
   -j, --jobs, specifies how many jobs to run at once, (default=number of CPUs)
