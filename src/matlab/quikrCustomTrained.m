@@ -15,19 +15,9 @@ if rws~=4^k
     error('Wrong k-mer size for input training matrix');
 end
 
-if (isunix && not(ismac))
-    [status, counts]=unix([sprintf('./count-linux -r %d -1 -u ',k) ' ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels.
-     if status ~= 0
-        error('./count-linux failed: ensure count-linux is an executable. Try chmod a+rx count-linux. Be sure matlab/octave is in the same directory as count-linux');
-    end
-elseif ismac
-    [status, counts]=unix([sprintf('./count-osx -r %d -1 -u ',k) ' ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels.
-    if status ~= 0
-        error('./count-osx failed: ensure count-linux is an executable. Try chmod a+rx count-osx. Be sure matlab/octave is in the same directory as count-osx');
-    end
-elseif ispc
-   error('Windows is not yet supported');
-end
+[status, counts]=unix(['count-kmers -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
+if status ~= 0
+  error('count-kmers failed: ensure count-kmers is in your path.');
 
 counts=textscan(counts,'%f'); %read them in as floats.
 counts=counts{:};

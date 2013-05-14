@@ -21,13 +21,7 @@ outputfilename=fullfile(pathtofile, [filename sprintf('-sensingmatrixK%d.txt',k)
 
 kmerfilename=sprintf('%dmers.txt',k); %This contains the list of 6-mers to count. In future versions this will be computed locally instead of being read in.
 
-if (isunix && not(ismac)) %this is for the linux version
-    unix(['./probabilities-by-read-linux ' sprintf('%d',k) ' ' inputfasta ' ' kmerfilename ' > ' outputfilename]); %obtain the k-mer counts of the inputfasta read-by-read
-elseif ismac %mac version
-    unix(['./probabilities-by-read-osx ' sprintf('%d',k) ' ' inputfasta ' ' kmerfilename ' > ' outputfilename]); %obtain the k-mer counts of the inputfasta read-by-read
-elseif ispc %No PC version
-    error('Windows is not yet supported');
-end
+unix(['probabilities-by-read ' sprintf('%d',k) ' ' inputfasta ' ' kmerfilename ' > ' outputfilename]); %obtain the k-mer counts of the inputfasta read-by-read
 
 fid=fopen(outputfilename); %open the output file
 

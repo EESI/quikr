@@ -12,21 +12,12 @@ function xstar = quikr(inputfasta)
 %orientation, so as a preprocessing step, make sure everything is in the
 %forward (+) orientation.
 if nargin>1
-    error('too many input arguments');
-end
-if (isunix && not(ismac))   %If linux, use ./count-linux
-    [status, counts]=unix(['./count-linux -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
-    if status ~= 0
-        error('./count-linux failed: ensure count-linux is an executable. Try chmod a+rx count-linux. Be sure matlab/octave is in the same directory as count-linux');
-    end
-elseif ismac %If mac, then use ./count-osx
-    [status, counts]=unix(['./count-osx -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
-    if status ~= 0
-        error('./count-osx failed: ensure count-linux is an executable. Try chmod a+rx count-osx. Be sure matlab/octave is in the same directory as count-osx');
-    end
-elseif ispc
-    error('Windows is not yet supported');
-end    
+  error('too many input arguments');
+
+[status, counts]=unix(['count-kmers -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
+if status ~= 0
+  error('count-kmers failed: ensure count-kmers is in your path.');
+
 counts=textscan(counts,'%f'); %convert into floats
 counts=counts{:}; %make into a vector
 counts=counts/sum(counts); %form a probability vector from the counts
