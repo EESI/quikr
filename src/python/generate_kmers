@@ -1,8 +1,23 @@
 #!/usr/bin/env python
-import quikr
+import itertools
 import sys
 
+def generate_kmers(kmer):
+  """ generate all possible kmers permutations seperated by newlines 
+
+ >>> kmers =  generate_kmers(1)
+ >>> generate_kmers(2)
+
+ param kmer: the desired Mer size
+ type  kmer: int
+ return: Returns a string of kmers seperated by newlines
+ rtype: string
+ """
+
+  return '\n'.join(''.join(x) for x in itertools.product('acgt', repeat=kmer))
+    
 if(len(sys.argv) < 2):
   print "usage: generate_kmers KMER_SIZE"
   exit(1)
-print quikr.generate_kmers(int(sys.argv[1]))
+
+print generate_kmers(int(sys.argv[1]))
