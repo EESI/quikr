@@ -26,14 +26,14 @@ def main():
   global input_directory 
   global output_directory 
   global lamb
-  global trained_matrix 
+  global sensing_matrix 
 
   parser = argparse.ArgumentParser(description="MultifastaOTU")
 
   parser.add_argument("-i", "--input-directory", help="directory containing fasta files", required=True)
   parser.add_argument("-o", "--otu-table", help="otu_table", required=True)
-  parser.add_argument("-t", "--trained-matrix", help="your trained matrix ", required=True)
-  parser.add_argument("-f", "--trained-fasta", help="the fasta file used to train your matrix", required=True)
+  parser.add_argument("-s", "--sensing-matrix", help="your sensing matrix ", required=True)
+  parser.add_argument("-f", "--sensing-fasta", help="the fasta file used to train your matrix", required=True)
   parser.add_argument("-l", "--lamb", type=int, help="the default lambda value is 10,000")
   parser.add_argument("-k", "--kmer", type=int, help="specifies which kmer to use, default=6")
   parser.add_argument("-j", "--jobs", type=int, help="specifies how many jobs to run at once, default=number of CPUs")
@@ -41,18 +41,18 @@ def main():
     
   # our defaults
   jobs = multiprocessing.cpu_count()
-  trained_matrix = args.trained_matrix
+  sensing_matrix = args.sensing_matrix
   input_directory = args.input_directory
 
   # Make sure our input exist
   if not os.path.isdir(args.input_directory):
     parser.error("Input directory not found")
 
-  if not os.path.isfile(args.trained_matrix):
-    parser.error("Custom trained matrix not found")
+  if not os.path.isfile(args.sensing_matrix):
+    parser.error("Custom sensing matrix not found")
     
-  if not os.path.isfile(args.trained_fasta):
-    parser.error("Fasta file of trained matrix not found")
+  if not os.path.isfile(args.sensing_fasta):
+    parser.error("Fasta file of sensing matrix not found")
 
   # use alternative lambda
   if args.lamb is not None:
@@ -64,13 +64,13 @@ def main():
   if args.kmer is not None:
     kmer = args.kmer
 
-  # Load trained matrix
-  if q.is_compressed(args.trained_matrix):
-    trained_matrix_file = gzip.open(args.trained_matrix, "rb")
+  # Load sensing matrix
+  if q.is_compressed(args.sensing_matrix):
+    sensing_matrix_file = gzip.open(args.sensing_matrix, "rb")
   else:
-    trained_matrix_file = open(args.trained_matrix, "rb")
+    sensing_matrix_file = open(args.sensing_matrix, "rb")
   
-  trained_matrix = np.load(trained_matrix_file)
+  sensing_matrix = np.load(sensing_matrix_file)
 
   fasta_list = []
 
@@ -89,10 +89,10 @@ def main():
 
   # Create an array of headers
   headers = []
-  trained_matrix_headers = open(args.trained_fasta, "rU")
-  for header in SeqIO.parse(trained_matrix_headers, "fasta"):
+  sensing_matrix_headers = open(args.sensing_fasta, "rU")
+  for header in SeqIO.parse(sensing_matrix_headers, "fasta"):
     headers.append(header.id)
-  trained_matrix_headers.close()
+  sensing_matrix_headers.close()
 
   # create our number of reads matrix
   number_of_reads = np.zeros((len(headers), len(fasta_list)))
@@ -148,7 +148,7 @@ def main():
 def quikr_call(fasta_file):
   print os.path.basename(fasta_file)
 
-  xstar = q.calculate_estimated_frequencies(fasta_file, trained_matrix, kmer, lamb)
+  xstar = q.calculate_estimated_frequencies(fasta_file, sensing_matrix, kmer, lamb)
   return xstar
 
 if __name__ == "__main__":

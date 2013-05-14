@@ -39,7 +39,7 @@ def is_compressed(filename):
   
 def train_matrix(input_file_location, kmer):
   """
-  Takes a input fasta file, and kmer, returns a custom trained matrix
+  Takes a input fasta file, and kmer, returns a custom sensing matrix
   """
 
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
@@ -54,23 +54,23 @@ def train_matrix(input_file_location, kmer):
   return matrix
 
 
-def load_trained_matrix_from_file(trained_matrix_location):
-  """ This is a helper function to load our trained matrix and run quikr """
+def load_sensing_matrix_from_file(sensing_matrix_location):
+  """ This is a helper function to load our sensing matrix and run quikr """
   
-  if is_compressed(trained_matrix_location):
-    trained_matrix_file = gzip.open(trained_matrix_location, "rb")
+  if is_compressed(sensing_matrix_location):
+    sensing_matrix_file = gzip.open(sensing_matrix_location, "rb")
   else:
-    trained_matrix_file = open(trained_matrix_location, "rb")
+    sensing_matrix_file = open(sensing_matrix_location, "rb")
   
-  trained_matrix = np.load(trained_matrix_file)
+  sensing_matrix = np.load(sensing_matrix_file)
 
-  return trained_matrix
+  return sensing_matrix
 
 
-def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, default_lambda):
+def calculate_estimated_frequencies(input_fasta_location, sensing_matrix, kmer, default_lambda):
   """
   input_fasta is the input fasta file to find the estimated frequencies of
-  trained_matrix is the trained matrix we are using to estimate the species
+  sensing_matrix is the sensing matrix we are using to estimate the species
   kmer is the desired k-mer to use
   default_lambda is inp 
   
@@ -93,10 +93,10 @@ def calculate_estimated_frequencies(input_fasta_location, trained_matrix, kmer, 
   counts = np.concatenate([np.zeros(1), counts])
 
   #form the k-mer sensing matrix
-  trained_matrix = trained_matrix * default_lambda;
-  trained_matrix = np.vstack((np.ones(trained_matrix.shape[1]), trained_matrix))
+  sensing_matrix = sensing_matrix * default_lambda;
+  sensing_matrix = np.vstack((np.ones(sensing_matrix.shape[1]), sensing_matrix))
 
-  xstar, rnorm = scipy.optimize.nnls(trained_matrix, counts) 
+  xstar, rnorm = scipy.optimize.nnls(sensing_matrix, counts) 
   xstar = xstar / xstar.sum(0) 
 
   return xstar
