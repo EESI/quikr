@@ -13,17 +13,19 @@ function xstar = quikr(inputfasta)
 %forward (+) orientation.
 if nargin>1
   error('too many input arguments');
+end
 
 [status, counts]=unix(['count-kmers -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
 if status ~= 0
   error('count-kmers failed: ensure count-kmers is in your path.');
+end
 
 counts=textscan(counts,'%f'); %convert into floats
 counts=counts{:}; %make into a vector
 counts=counts/sum(counts); %form a probability vector from the counts
 lambda=10000; %this is the default lambda value (see the paper), and is used in the formation of trainset7_112011N6Aaux.mat
 yaux=[0;lambda*counts]; % form the sample vector
-load('trainset7_112011N6Aaux.mat') %load the 6-mer sensing matrix...I need to rename this so the variable is just Aaux.
+load('../../data/trainset7_112011N6Aaux.mat') %load the 6-mer sensing matrix...I need to rename this so the variable is just Aaux.
 if not(exist('Aaux2')) %make sure Aaux2 loaded
     error('The default training database trainset7_112011N6Aaux.mat failed to load. Be sure it exists in the Quikr folder or current directory');
 end

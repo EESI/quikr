@@ -1,3 +1,6 @@
+* Quikr multifasta->otu_table_(for_qiime_use) wrapper code written by Gail Rosen -- 2/1/2013
+
+Usage tips:
 * Please name fasta files of sample reads with <sample id>.fa<*> and place them into one directory without any other file in that directory (for example, no hidden files that the operating system may generate, are allowed in that directory)
 * Note: When making your QIIME Metadata file, the sample id's must match the fasta file prefix names
 * Fasta files of reads must have a suffix that starts with .fa (e.g.: .fasta and .fa are valid while .fna is NOT)

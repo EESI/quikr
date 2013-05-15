@@ -1,0 +1,61 @@
+.TH quikr_train 1 quikr_train-2013-05
+.SH NAME
+quikr_train \- train databases for use with Quikr
+.SH SYNOPSIS
+.B quikr_train
+.RB [ \-i
+.IR input]
+.RB [ \-o
+.IR output]
+.RB [ \-k
+.IR kmer ]
+.RB [ \-v ]
+.P
+.BR quikr " ..."
+.SH DESCRIPTION
+.B quikr
+The quikr_train is a utility to train a database for use with quikr.
+Before running the quikr utility, you need to generate the sensing matrix or
+download a pretrained one from our project's homepage.
+
+quikr_train returns a sensing matrix that can be used with the quikr
+function. 
+.P
+.SH OPTIONS
+.TP
+.B \-i, --input
+the database of sequences to create the sensing matrix. (fasta format)
+.TP
+.B \-k, --kmer
+specify what size of kmer to use. (default value is 6)
+.TP
+.B \-o, --output
+the sensing matrix. (a gzip'd text file)
+.TP
+.B \-v, --verbose
+verbose mode.
+.SH EXAMPLES
+Use quikr_train to generate a sensing matrix from rdp7.fasta. This uses 6mers by default.
+.P
+quikr_train -i rdp7.fa -o rd7_sensing_matrix.gz
+.SH USAGE
+If you do not have a .gz file on your output matrix name, it will be appended.
+.SH "SEE ALSO"
+\fBmultifasta_to_otu\fP(1), \fBquikr\fP(1).
+.SH AUTHORS
+.B quikr
+was written by Gail Rosen <gailr@ece.drexel.edu>, Calvin Morrison 
+<mutantturkey@gmail.com>, David Koslicki, Simon Foucart, Jean-Luc Bouchot
+.SH REPORTING BUGS
+.TP
+Please report all bugs to Gail Rosen <gailr@ece.drexel.edu>. Include your \
+operating system, current compiler, and test files to reproduce your issue.
+.SH COPYRIGHT.
+Copyright \(co 2013 by Calvin Morrison and Gail Rosen.  Permission to use, 
+copy, modify, distribute, and sell this software and its documentation for
+any purpose is hereby granted without fee, provided that the above copyright 
+notice appear in all copies and that both that copyright notice and this 
+permission noticeappear in supporting documentation.  No representations are
+made about the suitability of this software for any purpose.  It is provided
+"as is" without express or implied warranty.
+

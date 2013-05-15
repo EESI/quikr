@@ -11,7 +11,7 @@ def main():
     "Quikr returns the estimated frequencies of batcteria present when given a \
     input FASTA file. \n")
     parser.add_argument("-f", "--fasta", help="the sample's fasta file of NGS READS", required=True)
-    parser.add_argument("-o", "--output", help="OTU_FRACTION_PRESENT, a vector \ 
+    parser.add_argument("-o", "--output", help="OTU_FRACTION_PRESENT, a vector \
     representing the percentage of database sequence's presence in a sequence. (csv output)", required=True)
     parser.add_argument("-s", "--sensing-matrix", help="the sensing matrix", required=True)
     parser.add_argument("-l", "--lamb", type=int, help="the lambda size. (default is 10,000")

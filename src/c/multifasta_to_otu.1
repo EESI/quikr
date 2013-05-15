@@ -1,0 +1,95 @@
+.TH multifasta_to_otu 1 multifasta_to_otu-2013-05
+.SH NAME
+multifasta_to_otu \- create a QIIME OTU table based on Quikr results.
+.SH SYNOPSIS
+.B multifasta_to_otu
+.RB [ \-i
+.IR input-directory ]
+.RB [ \-f
+.IR sensing-fasta]
+.RB [ \-s
+.IR sensing-matrix]
+.RB [ \-k
+.IR kmer ]
+.RB [ \-l
+.IR lambda ]
+.RB [ \-j
+.IR jobs ]
+.RB [ \-o
+.IR otu-table]
+.RB [ \-v ]
+.P
+.BR multifasta_to_otu " ..."
+.SH DESCRIPTION
+.B multifasta_to_otu
+The multifasta_to_otu tool is a handy wrapper for quikr which lets the user
+to input as many fasta files as they like, and then returns an OTU table of the
+number of times a specimen was seen in all of the samples.
+.P
+.SH OPTIONS
+.TP
+.B \-i, --input-directory
+the directory containing the samples' fasta files of reads (note each fasta file should correspond to a separate sample)
+.TP
+.B \-f, --sensing-fasta
+location of the fasta file database used to create the sensing matrix.
+.TP
+.B \-s, --sensing-matrix
+location of the sensing matrix.
+.TP
+.b \-k, --kmer
+specify what size of kmer to use. (default value is 6)
+.TP
+.B \-l, --lambda
+lambda value to use. (default value is 10000)
+.TP
+.B \-j, --jobs
+specifies how many jobs to run at once. (default value is the number of CPUs)
+.TP
+.B \-o, --otu-table
+the OTU table, with OTU_FRACTION_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or sequence table if not OTU's)
+.TP
+.B \-v, --verbose
+verbose mode.
+.SH USAGE
+This program will use a large amount of memory, and CPU time. 
+You can reduce the number of cores used, and thus memory, by specifying the -j flag with aspecified number of jobs. Otherwise multifasta_to_otu will run one job per cpu core.
+.SH POSTPROCESSING
+.B Note: When making your QIIME Metadata file, the sample id's must match the sample fasta file prefix names
+.P
+4-step QIIME procedure after using Quikr to obtain 3D PCoA graphs: (Note: Our code works much better with WEIGHTED Unifrac as opposed to Unweighted.)
+.TP
+Pre-requisites:
+1. multifasta output file "quikr_output_table.txt" for our example.
+.br
+2. the tree of the database sequences that were used (e.g.dp7_mafft.fasttree, gg_94_otus_4feb2011.tre, etc.)
+.br
+3. your-defined <qiime_metadata_file.txt>
+.TP
+The QIIME procedue:
+convert_biom.py -i <quikr_otu_table.txt> -o <quikr_otu>.biom --biom_table_type="otu table"
+.br
+beta_diversity.py -i <quikr_otu>.biom -m weighted_unifrac -o beta_div -t <tree file>
+.br
+principal_coordinates.py -i beta_div/weighted_unifrac_<quikr_otu>.txt -o <quikr_otu_project_name>_weighted.txt
+.br
+make_3d_plots.py -i <quikr_otu_project_name>_weighted.txt -o <3d_pcoa_plotdirectory> -m <qiime_metadata_file>
+.SH "SEE ALSO"
+\fBquikr\fP(1), \fBquikr_train\fP(1).
+.SH AUTHORS
+.B multifasta2otu 
+was written by Gail Rosen <gailr@ece.drexel.edu>, Calvin Morrison 
+<mutantturkey@gmail.com>, David Koslicki, Simon Foucart, Jean-Luc Bouchot
+.SH REPORTING BUGS
+.TP
+Please report all bugs to Gail Rosen <gailr@ece.drexel.edu>. Include your \
+operating system, current compiler, and test files to reproduce your issue.
+.SH COPYRIGHT.
+Copyright \(co 2013 by Calvin Morrison and Gail Rosen.  Permission to use, 
+copy, modify, distribute, and sell this software and its documentation for
+any purpose is hereby granted without fee, provided that the above copyright 
+notice appear in all copies and that both that copyright notice and this 
+permission noticeappear in supporting documentation.  No representations are
+made about the suitability of this software for any purpose.  It is provided
+"as is" without express or implied warranty.
+
