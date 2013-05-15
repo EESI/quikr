@@ -1,4 +1,4 @@
-# Quikr Command Line Utilities #  
+# Quikr Command Line Utilities #
 Quikr has three command-line utilities that mirror the behavior of the python
 module and the matlab implementation. The advantage of this is ease of scripting
 and job management, as well as faster processing and lower memory usage. These 
