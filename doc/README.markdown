@@ -13,7 +13,7 @@ accurate down to the genus level.
 ## How Do I Install Quikr ##
 Please read the directions on the [installation page](install.markdown).
 
-## How Do I use Quikr ## 
+## How Do I use Quikr ##
 We have several ways to use quikr. Quikr is first and formost a command
 line utility, but we also provide python and matlab scripts.
 
@@ -21,7 +21,7 @@ line utility, but we also provide python and matlab scripts.
 + [Matlab documentation](matlab.markdown)
 + [Python documentation](python.markdown)
 
-## Contact ##                                   
+## Contact ##
 For issues with the quikr software, contact gailro@gmail.com
 
 ## Contributors ##
