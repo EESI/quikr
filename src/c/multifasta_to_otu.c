@@ -122,9 +122,6 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  // set defaults
-
-
   if(verbose) { 
     printf("kmer: %d\n", kmer);
     printf("lambda: %d\n", lambda);
@@ -135,6 +132,16 @@ int main(int argc, char **argv) {
     printf("number of jobs to run at once: %d\n", jobs); 
   }
 
+
+  if(access (sensing_matrix_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
+    exit(EXIT_FAILURE);
+  }
+
+  if(access (sensing_fasta_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", sensing_fasta_filename);
+    exit(EXIT_FAILURE);
+  }
 
   input_directory_dh = opendir(input_fasta_directory);
   if(input_fasta_directory == NULL) {
@@ -155,6 +162,9 @@ int main(int argc, char **argv) {
   // 4 "ACGT" ^ Kmer gives us the size of output rows
   width = pow(4, kmer) + 1;
   sequences = count_sequences(sensing_fasta_filename);
+  if(sequences == 0) {
+    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", sensing_fasta_filename);
+  }
 
   if(verbose) {
     printf("directory count: %d\n", dir_count);
