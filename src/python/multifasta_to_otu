@@ -78,7 +78,6 @@ def main():
   fasta_list = glob.glob(args.input_directory + "/*.fa");
   fasta_list = fasta_list + glob.glob(args.input_directory + "/*.fasta")
   
-  print fasta_list
   # Sort the list
   
   fasta_list.sort()
