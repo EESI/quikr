@@ -1,47 +1,32 @@
-# How Can I Install The Quikr Utility? #
-To use Quikr there are several prerequisites. 
+# Quikr #
+This is the homepage for quikr.
 
-## Requirements ##
-+ Mac OS X 10.6.8 or GNU/Linux
-+ 4Gb of RAM minimum. Absolutely neccessary.
-+ gcc that supports OpenMP
+## What is Quikr ##
+Quikr is a QUadratic, Iterative, K-mer based Reconstruction technique that
+utilizes sparsity promoting ideas from the field of compressed sensing to
+reconstruct the composition of a bacterial community (when the input data is
+454-like pyrosequencing data). This extremely fast method comes with a default
+training database but can be custom trained. Typically reconstruction is
+accurate down to the genus level.
 
-### Python Requirements ###
-+ Python 2.7
-+ Scipy 
-+ Numpy
-+ BioPython
 
-### Mac Requirements ###
-+ Mac OS X 10.6.8 (what we have tested)
-+ GCC 4.7 or newer. (gcc 4.2 did not work, and is the default installation)
-+ OCaml compiler mlton
-+ OpenMP libraries (libgomp, usually comes with gcc)
+## How Do I Install Quikr ##
+Please read the directions on the [installation page](install.markdown).
 
-### Linux Requirements ###
-+ GCC 4.7 or newer
-+ OCaml compiler mlton
-+ OpenMP libraries (libgomp, usually comes with gcc)
+## How Do I use Quikr ## 
+We have several ways to use quikr. Quikr is first and formost a command
+line utility, but we also provide python and matlab scripts.
 
-We also have a Quikr implementation in Matlab so that you can easily integrate
-Quikr into your custom programs and scripts.
++ [Command Line Utilities](cli.markdown)
++ [Matlab documentation](matlab.markdown)
++ [Python documentation](python.markdown)
 
-### Installation ###
-Our Quikr code is available on our sourceforge download page:
+## Contact ##                                   
+For issues with the quikr software, contact gailro@gmail.com
 
-[http://sourceforge.net/projects/quikr/](sourceforge project page)
-
-Our development GIT repository is available here:
-
-[http://rosalind.ece.drexel.edu/git/quikr/](rosalind.ece.drexel.edu/git/quikr/)
-
-To install quikr, download our project and in the folder run:
-
-    make
-    sudo make install
-
-This will install the quikr, quikr\_train and multifasta\_to\_otu utilities.
-To install the python scripts and module systemwide, run
-
-    make python
-    sudo make install_python
+## Contributors ##
++ David Koslicki
++ Simon Foucart
++ Gail Rosen
++ Calvin Morrison
++ Jean-Luc Bouchot
