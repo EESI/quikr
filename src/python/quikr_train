@@ -32,13 +32,13 @@ def main():
   if not os.path.isfile(args.input):
     parser.error( "Input database not found")
 
-  # call the quikr train function, save the output with np.save
-  matrix = quikr.train_matrix(args.input, args.kmer)
-
   if args.kmer is None: 
     kmer = 6
   else:
     kmer = args.kmer
+
+  # call the quikr train function, save the output with np.save
+  matrix = quikr.train_matrix(args.input, kmer)
 
   if args.compress: 
     output_file = gzip.open(args.output, "wb")
