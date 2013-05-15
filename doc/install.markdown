@@ -26,7 +26,7 @@ To use Quikr there are several prerequisites.
 We also have a Quikr implementation in Matlab so that you can easily integrate
 Quikr into your custom programs and scripts.
 
-### Installation ###
+## Installation ##
 Our Quikr code is available on our sourceforge download page:
 
 [http://sourceforge.net/projects/quikr/](sourceforge project page)
