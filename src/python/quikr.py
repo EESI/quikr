@@ -1,3 +1,13 @@
+'''
+  This is a python implementation of the Quikr program.
+'''
+__author__ = "Calvin Morrison"
+__credits__ = ["Calvin Morrison", "Gail Rosen", "Simon Foucart", "Jean-Luc Bouchot", "David Koslicki"]
+__license__ = "GPL"
+__maintainer__ = "Gail Rosen"
+__email__ = "gailro@gmail.com"
+__status__ = "Release"
+
 import os
 import sys
 from StringIO import StringIO
@@ -9,19 +19,15 @@ import gzip
 import itertools
 
 
-
 def is_compressed(filename):
-  """ This function checks to see if the file is gzipped
+  """ This is a helper function to see if a file is gzipped
   
   >>> boolean_value = is_compressed("/path/to/compressed/gzip/file")
   >>> print boolean_value
   True
 
-  param filename: the filename to check
-  type  filename: string
-  return: Returns whether the file is gzipped
-  rtype: boolean
-
+  input: filename
+  output: boolean
   """
   try:
     f = open(filename, "rb")
@@ -40,6 +46,8 @@ def is_compressed(filename):
 def train_matrix(input_file_location, kmer):
   """
   Takes a input fasta file, and kmer, returns a custom sensing matrix
+  
+  returns an ndarray
   """
 
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
