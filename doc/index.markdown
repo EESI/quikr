@@ -13,17 +13,16 @@ accurate down to the genus level.
 ## How Do I Install Quikr ##
 Please read the directions on the [installation page](install.html).
 
-
 ## How Do I use Quikr ## 
-We have several ways to use quikr. There is a python module, command line
-scripts, and matlab scripts.
+We have several ways to use quikr. Quikr is first and formost a command
+line utility, but we also provide python and matlab scripts.
 
++ [Command Line Utilities](cli.html)
 + [Matlab documentation](matlab.html)
 + [Python documentation](python.html)
-+ [Command Line Utilities](cli.html)
 
 ## Contact ##                                   
-For issues with the python implementation, contact gailro@gmail.com
+For issues with the quikr software, contact gailro@gmail.com
 
 ## Contributors ##
 + David Koslicki
