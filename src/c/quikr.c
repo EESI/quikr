@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
 
 
   int c;
-  int kmer = 0;
 
   char *input_fasta_filename = NULL;
   char *sensing_matrix_filename = NULL;
@@ -27,9 +26,15 @@ int main(int argc, char **argv) {
 
   int x = 0;
   int y = 0;
+
   int verbose = 0;
   int debug = 0;
-  int lambda = 0;
+
+  int lambda = 10000;
+  int kmer = 6;
+
+  int width = 0;
+  int sequences = 0;
 
   while (1) {
     static struct option long_options[] = {
@@ -107,10 +112,6 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  if(lambda == 0) 
-    lambda = 10000;
-  if(kmer == 0) 
-    kmer = 6;
 
   if(verbose) { 
     printf("kmer: %d\n", kmer);
@@ -121,10 +122,10 @@ int main(int argc, char **argv) {
     printf("output: %s\n", output_filename);
   }
   // 4 "ACGT" ^ Kmer gives us the size of output rows
-  int width = pow(4, kmer);
+  width = pow(4, kmer);
   width = width + 1;
 
-  int sequences = count_sequences(sensing_fasta_filename);
+  sequences = count_sequences(sensing_fasta_filename);
 
   if(verbose) {
     printf("width: %d\nsequences %d\n", width, sequences);
