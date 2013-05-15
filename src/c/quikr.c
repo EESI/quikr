@@ -112,7 +112,6 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-
   if(verbose) { 
     printf("kmer: %d\n", kmer);
     printf("lambda: %d\n", lambda);
@@ -121,11 +120,28 @@ int main(int argc, char **argv) {
     printf("sensing database fasta: %s\n", sensing_fasta_filename);
     printf("output: %s\n", output_filename);
   }
+
+  if(access (sensing_matrix_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
+    exit(EXIT_FAILURE);
+  }
+  if(access (sensing_fasta_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", sensing_fasta_filename);
+    exit(EXIT_FAILURE);
+  }
+  if(access (input_fasta_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", input_fasta_filename);
+    exit(EXIT_FAILURE);
+  }
+
   // 4 "ACGT" ^ Kmer gives us the size of output rows
   width = pow(4, kmer);
   width = width + 1;
 
   sequences = count_sequences(sensing_fasta_filename);
+  if(sequences == 0) {
+    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", sensing_fasta_filename);
+  }
 
   if(verbose) {
     printf("width: %d\nsequences %d\n", width, sequences);

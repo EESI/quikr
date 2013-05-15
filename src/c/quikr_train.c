@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
 
   int c;
-  int kmer = 0;
+  int kmer = 6;
 
   char *fasta_file = NULL;
   char *output_file = NULL;
@@ -88,13 +88,15 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  if(kmer == 0)
-    kmer = 6;
-
   if(verbose) {
     printf("kmer size: %d\n", kmer);
     printf("fasta file: %s\n", fasta_file);
     printf("output file: %s\n", output_file);
+  }
+
+  if(access (fasta_file, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", fasta_file);
+    exit(EXIT_FAILURE);
   }
 
   if(strcmp(&output_file[strlen(output_file) - 3], ".gz") != 0) {
@@ -107,6 +109,9 @@ int main(int argc, char **argv) {
   // 4 ^ Kmer gives us the width, or the number of permutations of ACTG with kmer length
   int width = pow(4, kmer);
   int sequences = count_sequences(fasta_file);
+  if(sequences == 0) {
+    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", fasta_file);
+  }
 
   if(verbose)
     printf("sequences: %d\nwidth: %d\n", sequences, width);
