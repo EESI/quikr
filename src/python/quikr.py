@@ -48,6 +48,9 @@ def train_matrix(input_file_location, kmer):
   Takes a input fasta file, and kmer, returns a custom sensing matrix
   
   returns an ndarray
+
+  >>> sensing_matrix = train_matrix("/path/to/my/fasta.file", 6)
+
   """
 
   input_file = Popen(["bash", "-c", "probabilities-by-read " + str(kmer) + " " + input_file_location + " <(generate_kmers 6)"], stdout=PIPE) 
@@ -63,7 +66,7 @@ def train_matrix(input_file_location, kmer):
 
 
 def load_sensing_matrix_from_file(sensing_matrix_location):
-  """ This is a helper function to load our sensing matrix and run quikr """
+  """ This is a helper function to load our sensing matrix from a file """
   
   if is_compressed(sensing_matrix_location):
     sensing_matrix_file = gzip.open(sensing_matrix_location, "rb")
@@ -75,12 +78,11 @@ def load_sensing_matrix_from_file(sensing_matrix_location):
   return sensing_matrix
 
 
-def calculate_estimated_frequencies(input_fasta_location, sensing_matrix, kmer, default_lambda):
+def calculate_estimated_frequencies(input_fasta_location, sensing_matrix, kmer, lamb):
   """
   input_fasta is the input fasta file to find the estimated frequencies of
   sensing_matrix is the sensing matrix we are using to estimate the species
   kmer is the desired k-mer to use
-  default_lambda is inp 
   
   returns the estimated requencies of bacteria present when given an input
   FASTA file of amplicon (454) reads. A k-mer based, L1 regularized, sparsity
@@ -97,11 +99,11 @@ def calculate_estimated_frequencies(input_fasta_location, sensing_matrix, kmer, 
   # load the output of our count program and form a probability vector from the counts  
   counts = np.loadtxt(count_input.stdout) 
   counts = counts / counts.sum(0) 
-  counts = default_lambda * counts
+  counts = lamb * counts
   counts = np.concatenate([np.zeros(1), counts])
 
   #form the k-mer sensing matrix
-  sensing_matrix = sensing_matrix * default_lambda;
+  sensing_matrix = sensing_matrix * lamb;
   sensing_matrix = np.vstack((np.ones(sensing_matrix.shape[1]), sensing_matrix))
 
   xstar, rnorm = scipy.optimize.nnls(sensing_matrix, counts) 
