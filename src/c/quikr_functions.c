@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <zlib.h>
 
 int count_sequences(char *filename) { 
   char command[512];
@@ -86,19 +87,14 @@ double *load_sensing_matrix(char *filename, int height, int width) {
   int x = 0;
   int y = 0;
 
-  char *line = NULL;
-  char *val;
-  char command[512];
-  size_t len = 0;
-  FILE *sensing_matrix_fh = NULL;
+  gzFile sensing_matrix_fh = NULL;
 
   double *sensing_matrix = malloc(height * width * sizeof(double));
   if(sensing_matrix == NULL) {
     fprintf(stderr, "Could not allocate memory for the sensing matrix\n");
   }
 
-  sprintf(command, "gzip -cd %s", filename);
-  sensing_matrix_fh = popen(command, "r");
+  sensing_matrix_fh = gzopen(filename, "r");
   if(sensing_matrix_fh == NULL) {
     fprintf(stderr, "could not open %s", filename);
     exit(EXIT_FAILURE);
@@ -106,20 +102,14 @@ double *load_sensing_matrix(char *filename, int height, int width) {
 
   // read our sensing matrix in
   for(x = 0; x < height; x++) {
-    getline(&line, &len, sensing_matrix_fh);
-    char *ptr;
-
-    // Read our first element in outside of the loop
-    val = strtok_r(line,"\t", &ptr);
-    sensing_matrix[width*x + 1] = atof(val);
-    // iterate through and load the array
-    for (y = 2; y < width; y++) {
-      val = strtok_r(NULL, "\t", &ptr);
-      sensing_matrix[width*x + y] = atof(val);
+    for (y = 1; y < width; y++) {
+      char buffer[14];
+      gzgets(sensing_matrix_fh, buffer, 14); 
+      sensing_matrix[width*x + y] = atof(buffer);
     }
   }
 
-  pclose(sensing_matrix_fh);
+  gzclose(sensing_matrix_fh);
 
   return sensing_matrix;
 }

@@ -1,7 +1,7 @@
 UNAME := $(shell uname)
 CC = gcc
 QUIKR_TRAIN_CFLAGS = -O3 -s -mtune=native -Wall -lm -lz -D$(UNAME)
-QUIKR_CFLAGS = -O3 -s -mtune=native -Wextra -Wall -lm -pthread -L../ -I../ -std=gnu99 -fopenmp -D$(UNAME)
+QUIKR_CFLAGS = -O3 -s -mtune=native -Wextra -Wall -lm -pthread -L../ -I../ -std=gnu99 -fopenmp -D$(UNAME) -lz
 all: quikr_train_ quikr_ multifasta_to_otu_
 
 multifasta_to_otu_:
