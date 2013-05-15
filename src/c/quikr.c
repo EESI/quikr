@@ -12,7 +12,7 @@
 #include "quikr_functions.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode."
+#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode.\n\n-d, --debug\n\tdebug mode, this will save our sensing matrix and sample matrix (A and B matricies) in files called 'sensing.matrix' and 'count.matrix' for debugging purposes"
 
 int main(int argc, char **argv) {
 
@@ -28,9 +28,8 @@ int main(int argc, char **argv) {
   int x = 0;
   int y = 0;
   int verbose = 0;
+  int debug = 0;
   int lambda = 0;
-  
-
 
   while (1) {
     static struct option long_options[] = {
@@ -41,6 +40,7 @@ int main(int argc, char **argv) {
       {"sensing-fasta",  required_argument, 0, 'f'},
       {"sensing-matrix", required_argument, 0, 's'},
       {"verbose", no_argument, 0, 'v'},
+      {"debug", no_argument, 0, 'd'},
       {0, 0, 0, 0}
     };
 
@@ -71,6 +71,8 @@ int main(int argc, char **argv) {
       case 'o':
         output_filename = optarg;
         break;
+      case 'd':
+        debug = 1;
       case 'v':
         verbose = 1;
         break;
@@ -147,7 +149,7 @@ int main(int argc, char **argv) {
     count_matrix[x] = count_matrix[x] * lambda;
   
   // output our matricies if we are in verbose mode
-  if(verbose) { 
+  if(debug) { 
     FILE *sensing_matrix_fh = fopen( "sensing.matrix", "w");
     if(sensing_matrix_fh == NULL) {
       fprintf(stderr, "could not open sensing.matrix for writing.\n");

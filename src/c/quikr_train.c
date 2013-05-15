@@ -10,7 +10,6 @@
 
 #include "quikr_functions.h"
 
-#define AWK_KMER_PERMUTATIONS "awk 'function p(l,v,i){for(i in A) {if(l<%d) p(l+1, (v?v\"\":x)i); else print v\"\"i;}} {A[$0]} END {p(1);} ' <<<$'A\nC\nG\nT'"
 #define USAGE "Usage:\n\tquikr_train [OPTION...] - to train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode."
 
 int main(int argc, char **argv) {
@@ -120,8 +119,7 @@ int main(int argc, char **argv) {
   }
 
   // call the probabilities-by-read command
-  sprintf(kmers_file, AWK_KMER_PERMUTATIONS, kmer);
-  sprintf(probabilities_command, "%s | probabilities-by-read %d %s /dev/stdin", kmers_file, kmer, fasta_file);
+  sprintf(probabilities_command, "generate_kmers %d | probabilities-by-read %d %s /dev/stdin", kmer, kmer, fasta_file);
   FILE *probabilities_output = popen(probabilities_command, "r");
   if(probabilities_output == NULL) {
     fprintf(stderr, "Error could not execute: %s\n", probabilities_command);

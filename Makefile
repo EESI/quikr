@@ -9,11 +9,13 @@ install:
 	@cp -vf src/c/quikr_train ${DESTDIR}${PREFIX}/bin/quikr_train
 	@cp -vf src/c/quikr ${DESTDIR}${PREFIX}/bin/quikr
 	@cp -vf src/c/multifasta_to_otu ${DESTDIR}${PREFIX}/bin/multifasta_to_otu 
+	@cp -vf src/python/generate_kmers ${DESTDIR}${PREFIX}/bin/generate_kmers
 	chmod -v 755 ${DESTDIR}${PREFIX}/bin/probabilities-by-read
 	chmod -v 755 ${DESTDIR}${PREFIX}/bin/count-kmers
 	chmod -v 755 ${DESTDIR}${PREFIX}/bin/quikr
 	chmod -v 755 ${DESTDIR}${PREFIX}/bin/quikr_train
 	chmod -v 755 ${DESTDIR}${PREFIX}/bin/multifasta_to_otu
+	chmod -v 755 ${DESTDIR}${PREFIX}/bin/generate_kmers
 	
 nbc:
 	@echo "building nbc"

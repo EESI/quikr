@@ -16,6 +16,7 @@ quikr \- Calculate estimated frequencies of bacteria in a sample.
 .RB [ \-o
 .IR output ]
 .RB [ \-v ]
+.RB [ \-d ]
 .P
 .BR quikr " ..."
 .SH DESCRIPTION
@@ -45,6 +46,9 @@ OTU_FRACTION_PRESENT a vector representing the percentage of database sequence's
 .TP
 .B \-v, --verbose
 verbose mode.
+.TP
+.B \-d, --debug
+debug mode, this will save our sensing matrix and sample matrix (A and B matricies) in files called 'sensing.matrix' and 'count.matrix' for debugging purposes
 .SH EXAMPLES
 Use quikr to calculate the estimated frequencies for sample.fa, using rdp7.fasta as the sensing matrix we generated with quikr_train. This uses 6-mers by default, and a lambda value of 10000:
 .P
