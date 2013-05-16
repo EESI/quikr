@@ -9,7 +9,7 @@ input_directory='../../separated_samples'; %path to input directory of samples
 output_directory='quikr_results'; %path to where want output files to go
 otu_table_name='rdp_otu_table.txt'; %name of output otu_table filename
 %Do not have to define trainingdatabase file here
-[headers,~]=fastaread('trainset7_112011.fa'); %read in the training database
+[headers,~]=fastaread('../../../data/trainset7_112011.fa'); %read in the training database
 
 mkdir([output_directory])
 thedirs=dir([input_directory]);

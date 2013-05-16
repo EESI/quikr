@@ -15,8 +15,10 @@ convert_biom.py -i <quikr_otu_table.txt> -o <quikr_otu>.biom --biom_table_type="
 (Note: Our code works much better with WEIGHTED Unifrac as opposed to 
 Unweighted.)
 
-Pre-requisites: 1) <quikr_otu_table.txt>, 2) the tree of the database sequences that were used (e.g. 
-rdp7_mafft.fasttree, gg_94_otus_4feb2011.tre, etc.), and 3) your-defined <qiime_metadata_file.txt>
+Pre-requisites:
+1. <quikr_otu_table.txt>
+2. the tree of the database sequences that were used (e.g. rdp7_mafft.fasttree, gg_94_otus_4feb2011.tre. they are in the data directory)
+3. your-defined <qiime_metadata_file.txt>
 
 1. convert_biom.py -i <quikr_otu_table.txt> -o <quikr_otu>.biom --biom_table_type="otu table"
 2. beta_diversity.py -i <quikr_otu>.biom -m weighted_unifrac -o beta_div -t <tree file (example: rdp7_mafft.fasttree)>

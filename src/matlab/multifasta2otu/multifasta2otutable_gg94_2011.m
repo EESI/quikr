@@ -9,7 +9,7 @@
 input_directory='../separated_samples'; %path to input directory of samples
 output_directory='quikr_results'; %path to where want output files to go
 otu_table_name='gg1194_otu_octave.txt'; %name of output otu_table filename
-trainingdatabasefilename='gg_94_otus_4feb2011.fasta'; %full path to the FASTA file you wish to use as a training database
+trainingdatabasefilename='../../../data/gg_94_otus_4feb2011.fasta'; %full path to the FASTA file you wish to use as a training database
 
 
 mkdir([output_directory]);
