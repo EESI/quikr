@@ -12,7 +12,7 @@
 #include "quikr_functions.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode.\n\n-d, --debug\n\tdebug mode, this will save our sensing matrix and sample matrix (A and B matricies) in files called 'sensing.matrix' and 'count.matrix' for debugging purposes"
+#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode.\n\n-d, --debug\n\tdebug mode, read manpage for more details"
 
 int main(int argc, char **argv) {
 
@@ -97,12 +97,12 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   if(sensing_fasta_filename == NULL) {
-    fprintf(stderr, "Error: sensing matrix filename (-f) must be specified\n\n");
+    fprintf(stderr, "Error: sensing fasta filename (-f) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }
   if(output_filename == NULL) {
-    fprintf(stderr, "Error: Output Filename (-o) must be specified\n\n");
+    fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }

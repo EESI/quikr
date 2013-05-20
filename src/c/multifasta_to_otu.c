@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   if(output_filename == NULL) {
-    fprintf(stderr, "Error: Output Filename (-o) must be specified\n\n");
+    fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }

@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   }
 
   if(output_file == NULL) {
-    fprintf(stderr, "Error: output directory (-o) must be specified\n\n");
+    fprintf(stderr, "Error: output matrix file (-o) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }
