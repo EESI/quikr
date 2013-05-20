@@ -5,3 +5,7 @@ May 16th 2013, 1.0.1 Released
 - remove old multifasta_to_otu matlab scripts
 - minor documentation changes
 
+May 20th 2013, 1.0.1 Released
+- correted usage strings
+- install manpages globally (to {PREFIX}/share/man/man1)
+- added native gzip decoding for quikr and multifasta_to_otu
