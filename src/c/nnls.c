@@ -204,7 +204,7 @@ int nnls_algorithm(double *a, int m,int n, double *b, double *x, double *rnorm) 
   if(n < 3) 
     itmax=n*3;
   else 
-    itmax=n*n;
+    itmax=n*n*n;
  
 
   while(iz1 <= iz2 && nsetp < m) {
