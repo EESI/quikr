@@ -21,7 +21,7 @@ outputfilename=fullfile(pathtofile, [filename sprintf('-sensingmatrixK%d.txt',k)
 
 kmerfilename=sprintf('%dmers.txt',k); %This contains the list of 6-mers to count. In future versions this will be computed locally instead of being read in.
 
-unix(['probabilities-by-read ' sprintf('%d',k) ' ' inputfasta ' ' kmerfilename ' > ' outputfilename]); %obtain the k-mer counts of the inputfasta read-by-read
+unix(['probabilities-by-read ' sprintf('%d',k) ' ' inputfasta ' <( generate_kmers ' sprintf('%d',k) ') > ' outputfilename]); %obtain the k-mer counts of the inputfasta read-by-read
 
 fid=fopen(outputfilename); %open the output file
 
