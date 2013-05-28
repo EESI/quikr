@@ -1,6 +1,13 @@
 # Quikr's Matlab Implementation #
 The Quikr implementation works in Matlab and also works in Octave, but the
-Octave version will run much slower
+Octave version will run much slower.
+
+You will need to install the generate_kmers tool into your $PATH (eg /usr/bin/)
+this file is available in the src/python/ directory. If you use make to install
+the quikr project, it will already be installed. To test this you can run:
+
+    which generate_kmers
+    
 
 ## Quikr Example ##
 This is an example of how to run Quikr. Before you try the example please make
