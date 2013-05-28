@@ -24,6 +24,11 @@ line utility, but we also provide python and matlab scripts.
 ## Contact ##
 For issues with the quikr software, contact gailro@gmail.com
 
+## License ##
+
+The Quikr project is released under the GPL-3 License. Please view the LICENSE
+file for more details.
+
 ## Contributors ##
 + David Koslicki
 + Simon Foucart
