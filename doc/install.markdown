@@ -5,6 +5,7 @@ To use Quikr there are several prerequisites.
 + Mac OS X 10.6.8 or GNU/Linux
 + 4Gb of RAM minimum. Absolutely neccessary.
 + gcc that supports OpenMP
++ mlton, the ML compile
 
 ### Python Requirements ###
 + Python 2.7
