@@ -29,11 +29,9 @@ Quikr into your custom programs and scripts.
 ## Installation ##
 Our Quikr code is available on our sourceforge download page:
 
-[http://sourceforge.net/projects/quikr/](sourceforge project page)
+[sourceforge project page](http://sourceforge.net/projects/quikr/)
 
-Our development GIT repository is available here:
-
-[http://rosalind.ece.drexel.edu/git/quikr/](rosalind.ece.drexel.edu/git/quikr/)
+Alternatively you can clone the latest version from Github.
 
 To install quikr, download our project and in the folder run:
 
