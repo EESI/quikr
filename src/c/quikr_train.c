@@ -100,7 +100,11 @@ int main(int argc, char **argv) {
   }
 
   if(strcmp(&output_file[strlen(output_file) - 3], ".gz") != 0) {
-    char *temp = malloc(sizeof(strlen(output_file) + 4));
+    char *temp = malloc(strlen(output_file) + 4);
+    if(temp == NULL) {
+      fprintf(stderr, "Could not allocate enough memory\n"); 
+      exit(EXIT_FAILURE);
+    }
     sprintf(temp, "%s.gz", output_file);
     output_file = temp;
     printf("appending a .gz to our output file: %s\n", output_file);
@@ -119,7 +123,7 @@ int main(int argc, char **argv) {
   // Allocate our matrix with the appropriate size, just one row
   double *trained_matrix = malloc(width*sizeof(double));
   if(trained_matrix == NULL) {
-    fprintf(stderr, "Could not allocated enough memory\n");
+    fprintf(stderr, "Could not allocate enough memory\n");
     exit(EXIT_FAILURE);
   }
 
