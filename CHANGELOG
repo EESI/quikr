@@ -13,3 +13,4 @@ May 20th 2013, 1.0.2 Released
 Current Development Branch
 - Licensing files and documentation added
 - Removed unused code from the NBC project
+- Fixed a overflow bug in quikr_train
