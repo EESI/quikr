@@ -75,6 +75,7 @@ double *load_count_matrix(char *filename, int width, int kmer) {
     count_matrix[x] = atoi(line);
   } 
 
+  free(line);
   pclose(count_output);
 
   return count_matrix;
@@ -119,6 +120,7 @@ double *load_sensing_matrix(char *filename, int height, int width) {
     }
   }
 
+  free(line);
   pclose(sensing_matrix_fh);
 
   return sensing_matrix;
@@ -156,6 +158,7 @@ char **load_headers(char *filename, int sequences) {
     headers[x] = header;
   }
 
+  free(line);
   pclose(grep_output);
 
   return headers;
