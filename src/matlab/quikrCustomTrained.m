@@ -10,12 +10,12 @@ if nargin~=4
     error('There must be exactly 4 input arguments: the training matrix, the /path/to/input/fastafile, the k-mer size, and lambda');
 end
 
-[rws, clumns]=size(trainingmatrix); %get the size of the training matrix
-if rws~=4^k
+[rows, columns]=size(trainingmatrix); %get the size of the training matrix
+if rows~=4^k
     error('Wrong k-mer size for input training matrix');
 end
 
-[status, counts]=unix(['count-kmers -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
+[status, counts]=unix([sprintf('count-kmers -r %d -1 -u ',k) ' ' inputfasta]); %count the k-mers in the fasta file, in the forward direction, return the counts without labels.
 if status ~= 0
   error('count-kmers failed: ensure count-kmers is in your path.');
 
@@ -25,7 +25,7 @@ counts=counts/sum(counts); %normalize the counts into a probability vector
 yaux=[0;lambda*counts]; %form the sample vector
 
 
-Aaux=[ones(1,clumns);lambda*trainingmatrix]; %form the k-mer sensing matrix
+Aaux=[ones(1,columns);lambda*trainingmatrix]; %form the k-mer sensing matrix
 warning off
 xstar=lsqnonneg(Aaux,yaux); %perform the non-negative lease squares
 warning on
