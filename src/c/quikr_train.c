@@ -15,7 +15,6 @@
 int main(int argc, char **argv) {
 
   char probabilities_command[512];
-  char kmers_file[256];
   char *line = NULL;
   char *val;
   size_t len = 0;
