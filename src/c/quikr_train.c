@@ -168,10 +168,10 @@ int main(int argc, char **argv) {
       trained_matrix[y] = trained_matrix[y] / row_sum;
     }
 
-    for( y = 0; y < width; y++) {
+    for( y = 0; y < (width - 1); y++) {
       gzprintf(output, "%.10f\t", trained_matrix[y]);
     }
-    gzprintf(output, "\n");
+    gzprintf(output, "%.10f\n", trained_matrix[width]);
   }
 
   free(trained_matrix);

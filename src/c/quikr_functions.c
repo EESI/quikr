@@ -106,7 +106,6 @@ double *load_sensing_matrix(char *filename, int height, int width) {
     for (y = 1; y < width; y++) {
       char buffer[14];
       gzgets(sensing_matrix_fh, buffer, 14); 
-      printf("%s\n", buffer);
       sensing_matrix[width*x + y] = atof(buffer);
     }
   }
