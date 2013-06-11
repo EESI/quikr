@@ -1,5 +1,5 @@
 /*
- *   nnls.c  (c) 2002-2009 Turku PET Centre
+ *   nnls.c  (c) 2003-2009 Turku PET Centre
  *   This file contains the routine NNLS (nonnegative least squares)
  *   and the subroutines required by it, except h12, which is in
  *   file 'lss_h12.c'.
@@ -30,15 +30,16 @@
  *  Checking for exceeding iteration count is corrected in nnls().
  */ 
 #include <stdio.h>
+#include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #define MAX(a,b) ((a) >= (b) ? (a) : (b))
 #define ABS(x) ((x) >= 0 ? (x) : -(x))
 
-int h12( int mode, int lpivot, int l1, int m, double *u, int u_dim1, double *up, double *cm, int ice, int icv, int ncv) {
+int64_t h12( int64_t mode, int64_t lpivot, int64_t l1, int64_t m, double *u, int64_t u_dim1, double *up, double *cm, int64_t ice, int64_t icv, int64_t ncv) {
   double d1,  b, clinv, cl, sm;
-  int k, j;
+  int64_t k, j;
 
   /* Check parameters */
   if (mode!=1 && mode!=2) 
@@ -166,12 +167,12 @@ void g1(double a, double b, double *cterm, double *sterm, double *sig)
 } 
 
 
-int nnls_algorithm(double *a, int m,int n, double *b, double *x, double *rnorm) {
-  int pfeas;
+int64_t nnls_algorithm(double *a, int64_t m,int64_t n, double *b, double *x, double *rnorm) {
+  int64_t pfeas;
   int ret=0;
-  int iz;
-  int jz;
-  int k, j=0, l, itmax, izmax=0, ii, jj=0, ip;
+  int64_t iz;
+  int64_t jz;
+  int64_t k, j=0, l, itmax, izmax=0, ii, jj=0, ip;
   double d1, d2, sm, up, ss; 
   double temp, wmax, t, alpha, asave, dummy, unorm, ztest, cc;
 
@@ -183,7 +184,7 @@ int nnls_algorithm(double *a, int m,int n, double *b, double *x, double *rnorm) 
   /* Allocate memory for working space, if required */
   double *w = (double*)calloc(n, sizeof(double));
   double *zz = (double*)calloc(m, sizeof(double));
-  int *index = (int*)calloc(n, sizeof(int));
+  int64_t *index = (int64_t*)calloc(n, sizeof(int64_t));
   if(w == NULL || zz == NULL || index == NULL) 
     return(2);
 
@@ -193,18 +194,18 @@ int nnls_algorithm(double *a, int m,int n, double *b, double *x, double *rnorm) 
     index[k]=k;
   }
 
-  int iz2 = n - 1;
-  int iz1 = 0;
-  int iter=0; 
-  int nsetp=0;
-  int npp1=0;
+  int64_t iz2 = n - 1;
+  int64_t iz1 = 0;
+  int64_t iter=0; 
+  int64_t nsetp=0;
+  int64_t npp1=0;
 
   /* Main loop; quit if all coeffs are already in the solution or */
   /* if M cols of A have been triangularized */
   if(n < 3) 
     itmax=n*3;
   else 
-    itmax=n*n*n;
+    itmax=n*n;
  
 
   while(iz1 <= iz2 && nsetp < m) {
@@ -395,7 +396,7 @@ int nnls_algorithm(double *a, int m,int n, double *b, double *x, double *rnorm) 
 /* nnls_ */
 
 
-double *nnls(double *a_matrix, double *b_matrix, int height, int width) {
+double *nnls(double *a_matrix, double *b_matrix, int64_t height, int64_t width) {
 
   double *solution = (double*)calloc(height, sizeof(double));
 
