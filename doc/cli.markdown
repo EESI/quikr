@@ -6,8 +6,7 @@ utilities are written in C and utilize OpenMP for multithreading.
 
 ## Quikr\_train ##
 The quikr\_train is a tool to train a database for use with the quikr tool.
-Before running the quikr utility, you need to generate the sensing matqrix or
-download a pretrained matrix from our database\_download.html.
+Before running the quikr utility, you need to generate the sensing matrix.
 
 ### Usage ###
 quikr\_train returns a custom sensing matrix that can be used with the quikr
