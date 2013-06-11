@@ -15,3 +15,5 @@ Current Development Branch
 - Fixed a overflow bug in quikr_train
 - added native gzip decoding for quikr and multifasta_to_otu
 - documentation fixes
+- use int64_t for NNLS to avoid overflow issues
+- use long for multifasta/quikr to avoid overflow issues
