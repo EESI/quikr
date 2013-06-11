@@ -10,7 +10,7 @@
 
 int count_sequences(char *filename) { 
   char command[512];
-  int sequences = 0;
+  long sequences = 0;
   FILE *grep_output;
 
   sprintf(command, "grep -c ^\\> %s", filename);
@@ -20,16 +20,16 @@ int count_sequences(char *filename) {
     exit(EXIT_FAILURE);
   }
   
-  fscanf(grep_output, "%d", &sequences);
+  fscanf(grep_output, "%ld", &sequences);
 
   pclose(grep_output);
   return sequences;
 }
 
 
-void normalize_matrix(double *matrix, int height, int width) {
-  int x = 0;
-  int y = 0;
+void normalize_matrix(double *matrix, long height, long width) {
+  long x = 0;
+  long y = 0;
   for(x = 0; x < height; x++) {
 
     double row_sum = 0;
@@ -42,16 +42,16 @@ void normalize_matrix(double *matrix, int height, int width) {
 }
 
 
-double *load_count_matrix(char *filename, int width, int kmer) {
+double *load_count_matrix(char *filename, long width, int kmer) {
 
   double *count_matrix = malloc((width)*sizeof(double));
   char count_command[512];
-  int x = 0;
+  long x = 0;
   char *line = NULL;
   size_t len = 0;
 
   if(count_matrix == NULL) {
-    fprintf(stderr, "could not allocate enough memory for the count matrix (%d x double) \n", width);
+    fprintf(stderr, "could not allocate enough memory for the count matrix\n");
     exit(EXIT_FAILURE);
   }
 
@@ -83,10 +83,10 @@ double *load_count_matrix(char *filename, int width, int kmer) {
 }
 
 
-double *load_sensing_matrix(char *filename, int height, int width) {
+double *load_sensing_matrix(char *filename, long height, long width) {
 
-  int x = 0;
-  int y = 0;
+  long x = 0;
+  long y = 0;
 
   gzFile sensing_matrix_fh = NULL;
 
@@ -115,10 +115,10 @@ double *load_sensing_matrix(char *filename, int height, int width) {
   return sensing_matrix;
 }
 
-char **load_headers(char *filename, int sequences) {
+char **load_headers(char *filename, long sequences) {
   char command[512];
   char *line= NULL;
-  int x = 0;
+  long x = 0;
   FILE *grep_output;
   size_t len = 0;
 
