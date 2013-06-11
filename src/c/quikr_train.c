@@ -10,7 +10,7 @@
 
 #include "quikr_functions.h"
 
-#define USAGE "Usage:\n\tquikr_train [OPTION...] - to train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode."
+#define USAGE "Usage:\n\tquikr_train [OPTION...] - train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode."
 
 int main(int argc, char **argv) {
 
