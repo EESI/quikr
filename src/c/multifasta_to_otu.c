@@ -26,14 +26,14 @@ int main(int argc, char **argv) {
 
   double *sensing_matrix;
 
-  long int width = 0;
-  long int sequences = 0;
+  long width = 0;
+  long sequences = 0;
 
   int kmer = 6;
   int lambda = 10000;
 
-  int x = 0;
-  int y = 0;
+  long x = 0;
+  long y = 0;
 
   int jobs = 1;
   #ifdef Linux
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
   } 
 
   // do a directory count
-  int dir_count = -2; // -2 for ../ and ./
+  long dir_count = -2; // -2 for ../ and ./
   while(entry = readdir(input_directory_dh)) 
     dir_count++; 
   rewinddir(input_directory_dh);
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
   }
 
   if(verbose) {
-    printf("directory count: %d\n", dir_count);
+    printf("directory count: %ld\n", dir_count);
     printf("width: %ld\nsequences %ld\n", width, sequences);
   }
 
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  int *file_sequence_count = malloc(dir_count * sizeof(int));
+  long *file_sequence_count = malloc(dir_count * sizeof(long));
   if(file_sequence_count == NULL) {
     fprintf(stderr, "Could not allocate enough memory\n");
     exit(EXIT_FAILURE);
@@ -206,12 +206,12 @@ int main(int argc, char **argv) {
   struct dirent result;
 
   omp_set_num_threads(jobs);
-  int done = 0;
+  long done = 0;
   printf("Beginning to process samples\n"); 
 #pragma omp parallel for shared(solutions, sequences, width, result, done)
-  for(int i = 0; i < dir_count; i++ ) {
+  for(long i = 0; i < dir_count; i++ ) {
 
-    int z = 0;
+    long z = 0;
     struct dirent *directory_entry;
     char *filename = malloc(256 * sizeof(char));
     char *base_filename = malloc(256 * sizeof(char));
@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
     }
 
     done++;
-    printf("%d/%d samples processed\n", done, dir_count); 
+    printf("%ld/%ld samples processed\n", done, dir_count); 
     free(solution);
     free(count_matrix);
     free(filename);

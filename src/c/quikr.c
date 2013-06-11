@@ -12,7 +12,7 @@
 #include "quikr_functions.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-d, --debug\n\tdebug mode, read manpage for more details"
+#define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-d, --debug\n\tdebug mode, read manpage for more details"
 
 int main(int argc, char **argv) {
 
@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
   char *sensing_fasta_filename = NULL;
   char *output_filename = NULL;
 
-  int x = 0;
-  int y = 0;
+  long x = 0;
+  long y = 0;
 
   int verbose = 0;
   int debug = 0;
@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
   int lambda = 10000;
   int kmer = 6;
 
-  int width = 0;
-  int sequences = 0;
+  long width = 0;
+  long sequences = 0;
 
   while (1) {
     static struct option long_options[] = {
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
   }
 
   if(verbose) {
-    printf("width: %d\nsequences %d\n", width, sequences);
+    printf("width: %ld\nsequences %ld\n", width, sequences);
   }
 
   double *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, sequences, width);
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  for(x= 0; x < sequences; x++) {
+  for(x = 0; x < sequences; x++) {
     sensing_matrix(x, 0) = 1.0;
   }
   // normalize our count_matrix
