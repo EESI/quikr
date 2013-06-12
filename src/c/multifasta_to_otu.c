@@ -13,7 +13,7 @@
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
 #define solutions(i,j) (solutions[sequences*i+ j])
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode."
+#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
@@ -58,11 +58,12 @@ int main(int argc, char **argv) {
       {"sensing-fasta",  required_argument, 0, 'f'},
       {"sensing-matrix", required_argument, 0, 's'},
       {"verbose", no_argument, 0, 'v'},
+      {"version", no_argument, 0, 'V'},
       {0, 0, 0, 0}
     };
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "k:l:f:s:i:o:j:hv", long_options, &option_index);
+    c = getopt_long (argc, argv, "k:l:f:s:i:o:j:hvV", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -91,6 +92,10 @@ int main(int argc, char **argv) {
         break;
       case 'v':
         verbose = 1;
+        break;
+      case 'V':
+        printf("%s\n", VERSION);
+        exit(EXIT_SUCCESS);
         break;
       case 'h':
         puts(USAGE);

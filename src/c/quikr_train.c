@@ -10,7 +10,7 @@
 
 #include "quikr_functions.h"
 
-#define USAGE "Usage:\n\tquikr_train [OPTION...] - train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode."
+#define USAGE "Usage:\n\tquikr_train [OPTION...] - train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
   while (1) {
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
+      {"version", no_argument, 0, 'V'},
       {"input", required_argument, 0, 'i'},
       {"kmer",  required_argument, 0, 'k'},
       {"output", required_argument, 0, 'o'},
@@ -44,7 +45,7 @@ int main(int argc, char **argv) {
 
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "i:o:k:hv", long_options, &option_index);
+    c = getopt_long (argc, argv, "i:o:k:hvV", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -61,6 +62,10 @@ int main(int argc, char **argv) {
         break;
       case 'v':
         verbose = 1;
+        break;
+      case 'V':
+        printf("%s\n", VERSION);
+        exit(EXIT_SUCCESS);
         break;
       case 'h':
         printf("%s\n", USAGE);
