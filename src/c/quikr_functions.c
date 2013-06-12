@@ -44,8 +44,8 @@ void normalize_matrix(double *matrix, long height, long width) {
 
 double *load_count_matrix(char *filename, long width, int kmer) {
 
-  double *count_matrix = malloc((width)*sizeof(double));
-  char count_command[512];
+  double *count_matrix = malloc(width*sizeof(double));
+  char count_command[1024];
   long x = 0;
   char *line = NULL;
   size_t len = 0;
@@ -114,6 +114,7 @@ double *load_sensing_matrix(char *filename, long height, long width) {
 
   return sensing_matrix;
 }
+
 
 char **load_headers(char *filename, long sequences) {
   char command[512];

@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
   }
 
   input_directory_dh = opendir(input_fasta_directory);
-  if(input_fasta_directory == NULL) {
+  if(input_directory_dh == NULL) {
     fprintf(stderr, "could not open %s\n", input_fasta_directory);
     exit(EXIT_FAILURE);
   } 
