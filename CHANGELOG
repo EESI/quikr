@@ -1,4 +1,7 @@
 May 15th 2013, 1.0.0 Released
+- initial version of quikr C version
+- initial version of quikr python version
+- initial version of quikr matlab scripts
 
 May 16th 2013, 1.0.1 Released
 - remove extra data 
@@ -9,11 +12,14 @@ May 20th 2013, 1.0.2 Released
 - correted usage strings
 - install manpages globally (to {PREFIX}/share/man/man1)
 
-Current Development Branch
-- Licensing files and documentation added
-- Removed unused code from the NBC project
-- Fixed a overflow bug in quikr_train
+June 12th 2013, 1.0.3 Relased
+- licensing files and documentation added
+- removed unused code from the NBC project
+- fixed a overflow bug in quikr_train
 - added native gzip decoding for quikr and multifasta_to_otu
 - documentation fixes
 - use int64_t for NNLS to avoid overflow issues
 - use long for multifasta/quikr to avoid overflow issues
+- implement --version and -V in quikr
+- fix input directory check in multifasta
+- matlab: don't depend on mer text files, instead use generate_kmers for kmers
