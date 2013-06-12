@@ -18,6 +18,7 @@ end
 [status, counts]=unix([sprintf('count-kmers -r %d -1 -u ',k) ' ' inputfasta]); %count the k-mers in the fasta file, in the forward direction, return the counts without labels.
 if status ~= 0
   error('count-kmers failed: ensure count-kmers is in your path.');
+end
 
 counts=textscan(counts,'%f'); %read them in as floats.
 counts=counts{:};
