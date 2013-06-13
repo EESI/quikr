@@ -208,12 +208,10 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  struct dirent result;
-
   omp_set_num_threads(jobs);
   long done = 0;
   printf("Beginning to process samples\n"); 
-#pragma omp parallel for shared(solutions, sequences, width, result, done)
+  #pragma omp parallel for shared(solutions, sequences, width, done)
   for(long i = 0; i < dir_count; i++ ) {
 
     long z = 0;
@@ -225,16 +223,18 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
 
-#pragma omp critical
-    readdir_r(input_directory_dh, &result, &directory_entry);
+    #pragma omp critical
+    {
+      directory_entry = readdir(input_directory_dh);
+      strcpy(base_filename, directory_entry->d_name);
+    }
 
-    if(strcmp(directory_entry->d_name, "..") == 0 || strcmp(directory_entry->d_name, ".") == 0) {
+    if(strcmp(base_filename, "..") == 0 || strcmp(base_filename, ".") == 0) {
       i--;
       continue;
     }
 
     // get our base filenames
-    strcpy(base_filename, directory_entry->d_name);
     filenames[i] = base_filename; 
 
     // get our real filename
