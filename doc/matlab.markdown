@@ -120,15 +120,15 @@ their concentrations (in the first and second columns respectively)
 
 Usage tips:
 * Please name fasta files of sample reads with <sample id>.fa<*> and place them
-  into one directory without any other f ile in that directory (for example, no
+  into one directory without any other file in that directory (for example, no
   hidden files that the operating system may generate, are allowed in that
-  direct ory)
+  directory)
 * Note: When making your QIIME Metadata file, the sample id's must match the
   fasta file prefix names
 * Fasta files of reads must have a suffix that starts with .fa (e.g.: .fasta and
   .fa are valid while .fna is NOT)
-* Modify the top of the Matlab/Octave scripts for <input_directory>,
-  <output_directory>, <output_filename>, and <train ing_database_filename>
+* Modify the top of the Matlab/Octave scripts for \<input\_directory\>,
+  \<output\_directory\>, \<output\_filename\>, and \<training\_database_filename\>
 
 To use with QIIME, one must run the QIIME conversion tool on our OTU table
 output:
@@ -142,13 +142,17 @@ output:
 Unweighted.)
 
 Pre-requisites:
-1. <quikr_otu_table.txt>
+1. \<quikr\_otu\_table.txt\>
 2. the tree of the database sequences that were used (e.g.  dp7\_mafft.fasttree,
    gg\_94\_otus\_4feb2011.tre, etc.)
-3. your-defined <qiime_metadata_file.txt>
+3. your-defined \<qiime\_metadata\_file.txt>
 
 The QIIME procedue:
+
     convert_biom.py -i <quikr_otu_table.txt> -o <quikr_otu>.biom --biom_table_type="otu table"
+    
     beta_diversity.py -i <quikr_otu>.biom -m weighted_unifrac -o beta_div -t <tree file> (example: rdp7_mafft.fasttree)>
+
     principal_coordinates.py -i beta_div/weighted_unifrac_<quikr_otu>.txt -o <quikr_otu_project_name>_weighted.txt
+    
     make_3d_plots.py -i <quikr_otu_project_name>_weighted.txt -o <3d_pcoa_plotdirectory> -m <qiime_metadata_file>
