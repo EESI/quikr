@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
       break;
 
     switch (c) {
-      case 0:
       case 'k':
         kmer = atoi(optarg);
         break;
