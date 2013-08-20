@@ -69,7 +69,7 @@ with aspecified number of jobs. Otherwise python with run one job per cpu core.
 
 ### Usage ###
 
-    multifasta\_to\_otu's arguments:
+    multifasta_to_otu's arguments:
     -i, --input-directory the directory containing the samples' fasta files of 
     reads (note each file should correspond to a separate sample)
     -f, --sensing-fasta location of the fasta file database used to create the sensing matrix (fasta format)
