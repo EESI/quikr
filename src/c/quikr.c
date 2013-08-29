@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
       {"sensing-matrix", required_argument, 0, 's'},
       {"verbose", no_argument, 0, 'v'},
       {"version", no_argument, 0, 'V'},
+      {"help", no_argument, 0, 'h'},
       {"debug", no_argument, 0, 'd'},
       {0, 0, 0, 0}
     };

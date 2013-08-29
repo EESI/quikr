@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
   while (1) {
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
+      {"help", no_argument, 0, 'h'},
       {"version", no_argument, 0, 'V'},
       {"input", required_argument, 0, 'i'},
       {"kmer",  required_argument, 0, 'k'},
