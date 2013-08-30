@@ -58,7 +58,7 @@ Warning: this program will use a large amount of memory, and CPU time. You can
 reduce the number of cores used, and thus memory, by specifying the -j flag
 with aspecified number of jobs. Otherwise python with run one job per cpu core.
 
-# Pre-processing of Multifasta\_to\_otu  #
+### Pre-processing of Multifasta\_to\_otu  ###
 
 * Please name fasta files of sample reads with <sample id>.fa<*> and place them
   into one directory without any other file in that directory (for example, no
@@ -67,7 +67,7 @@ with aspecified number of jobs. Otherwise python with run one job per cpu core.
 * Fasta files of reads must have a suffix that starts with .fa (e.g.: .fasta and
   .fa are valid while .fna is NOT)
 
-### Usage ###
+#### Usage ####
 
     multifasta_to_otu's arguments:
     -i, --input-directory the directory containing the samples' fasta files of 
@@ -92,10 +92,11 @@ with aspecified number of jobs. Otherwise python with run one job per cpu core.
 Unweighted.)
 
 Pre-requisites:
-1. <quikr_otu_table.txt>
+
+1. quikr_otu_table.txt (The OTU Table generated with multifasta_to_otu
 2. the tree of the database sequences that were used (e.g.  dp7\_mafft.fasttree,
    gg\_94\_otus\_4feb2011.tre, etc.)
-3. your-defined <qiime_metadata_file.txt>
+3. your-defined qiime_metadata_file.txt ( a Qiime Map file)
 
 The QIIME procedue:
 
@@ -105,7 +106,7 @@ The QIIME procedue:
     make_3d_plots.py -i <quikr_otu_project_name>_weighted.txt -o <3d_pcoa_plotdirectory> -m <qiime_metadata_file>
 
 
-#### Broken Pipe Errors ####
+## Broken Pipe Errors ##
 Make sure that you have the count-kmers and probablilties-by-read in your
 $PATH, and that they are executable. 
 
