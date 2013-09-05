@@ -28,7 +28,6 @@ int main(int argc, char **argv) {
   long y = 0;
 
   int verbose = 0;
-  int debug = 0;
 
   int lambda = 10000;
   int kmer = 6;
