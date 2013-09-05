@@ -1,4 +1,4 @@
-VERSION=\"v1.0.3\"
+VERSION=\"v1.0.4\"
 UNAME := $(shell uname)
 CC = gcc
 QUIKR_TRAIN_CFLAGS = -O3 -s -mtune=native -Wall -lm -lz -D$(UNAME) -DVERSION=$(VERSION)

@@ -23,3 +23,9 @@ June 12th 2013, 1.0.3 Relased
 - implement --version and -V in quikr
 - fix input directory check in multifasta
 - matlab: don't depend on mer text files, instead use generate_kmers for kmers
+
+Sept 5th 2013, 1.0.4 Released
+- fix -h and --help options to parse correctly
+- remove the debugging option
+- update Makefile to ensure NBC and the C verison are build before installing
+- documentation updates
