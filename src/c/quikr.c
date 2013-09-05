@@ -12,7 +12,7 @@
 #include "quikr_functions.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version.\n\n-d, --debug\n\tdebug mode, read manpage for more details"
+#define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
@@ -77,8 +77,6 @@ int main(int argc, char **argv) {
       case 'o':
         output_filename = optarg;
         break;
-      case 'd':
-        debug = 1;
       case 'v':
         verbose = 1;
         break;
@@ -170,32 +168,6 @@ int main(int argc, char **argv) {
   for(x = 0; x < width; x++) 
     count_matrix[x] = count_matrix[x] * lambda;
   
-  // output our matricies if we are in verbose mode
-  if(debug) { 
-    FILE *sensing_matrix_fh = fopen( "sensing.matrix", "w");
-    if(sensing_matrix_fh == NULL) {
-      fprintf(stderr, "could not open sensing.matrix for writing.\n");
-      exit(EXIT_FAILURE);
-    }
-    for(x = 0; x < sequences; x++) {
-      for( y = 0; y < width; y++) {
-        fprintf(sensing_matrix_fh, "%.10f\t", sensing_matrix(x, y));
-      }
-      fprintf(sensing_matrix_fh, "\n");
-    }
-    fclose(sensing_matrix_fh);
-
-    FILE *count_matrix_fh = fopen("count.matrix", "w");
-    if(count_matrix_fh == NULL) {
-      fprintf(stderr, "could not open sensing.matrix for writing.\n");
-      exit(EXIT_FAILURE);
-    }
-    for(x = 0; x < width; x++) {
-      fprintf(count_matrix_fh, "%.10f\n", count_matrix[x]);
-    }
-    fclose(count_matrix_fh);
-  }
-
   double *solution = nnls(sensing_matrix, count_matrix, sequences, width);
 
   // normalize our solution vector
