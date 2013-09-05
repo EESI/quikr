@@ -1,7 +1,7 @@
 PREFIX = "/usr/"
 all: nbc c
 
-install: 
+install: nbc c 
 	@echo installing executable files to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -vf src/nbc/probabilities-by-read ${DESTDIR}${PREFIX}/bin/probabilities-by-read
