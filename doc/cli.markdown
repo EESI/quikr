@@ -47,7 +47,6 @@ quikr returns the solution vector as a csv file.
     -o, --output OTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)
     -v, --verbose verbose mode.
     -V, --version print version.
-    -d, --debug debug mode, read manpage for more details
 
 ## Multifasta\_to\_otu ##
 The Multifasta\_to\_otu tool is a handy wrapper for quikr which lets the user
