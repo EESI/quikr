@@ -3,12 +3,12 @@
 #include <getopt.h>
 #include <math.h>
 #include <stdio.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "nnls.h"
+#include "kmer_utils.h"
 #include "quikr_functions.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
@@ -136,6 +136,11 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
+	if(kmer == 0) {
+    fprintf(stderr, "Error: zero is not a valid kmer\n");
+    exit(EXIT_FAILURE);
+	}
+
   // 4 "ACGT" ^ Kmer gives us the size of output rows
   width = pow(4, kmer);
   width = width + 1;
@@ -149,24 +154,40 @@ int main(int argc, char **argv) {
     printf("width: %ld\nsequences %ld\n", width, sequences);
   }
 
-  double *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, sequences, width);
-  double *count_matrix = load_count_matrix(input_fasta_filename, width, kmer);
 
-  // multiply our matrix by lambda
+	// load counts matrix
+	unsigned long long *integer_counts = get_kmer_counts_from_file(input_fasta_filename, kmer);
+
+	double *count_matrix = malloc(sizeof(double) * width);
+	count_matrix[0] = 0; 
+
+	for(x = 1; x < width ; x++)
+		count_matrix[x] = (double)integer_counts[x-1];
+
+	free(integer_counts);
+
+  // normalize our count_matrix
+  normalize_matrix(count_matrix, 1, width);
+
+  for(x = 0; x < width; x++) 
+    count_matrix[x] = count_matrix[x] * lambda;
+
+	// load sensing matrix
+  double *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, sequences, width);
+
+  // multiply our sensing matrix by lambda
   for(x = 1; x < sequences; x++) {
     for(y= 0; y < width - 1; y++) {
       sensing_matrix(x, y) = sensing_matrix(x, y) * lambda;
     }
   }
 
+	// set the first column of our sensing matrix to 0
   for(x = 0; x < sequences; x++) {
     sensing_matrix(x, 0) = 1.0;
   }
-  // normalize our count_matrix
-  normalize_matrix(count_matrix, 1, width);
-  for(x = 0; x < width; x++) 
-    count_matrix[x] = count_matrix[x] * lambda;
   
+	// run NNLS
   double *solution = nnls(sensing_matrix, count_matrix, sequences, width);
 
   // normalize our solution vector

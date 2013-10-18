@@ -1,17 +1,27 @@
 VERSION=\"v1.0.4\"
 UNAME := $(shell uname)
 CC = gcc
-QUIKR_TRAIN_CFLAGS = -O3 -s -mtune=native -Wall -lm -lz -D$(UNAME) -DVERSION=$(VERSION)
-MULTIFASTA_CFLAGS = -O3 -s -mtune=native -Wextra -Wall -lm -lz -pthread -L../ -I../ -std=gnu99 -fopenmp -D$(UNAME) -DVERSION=$(VERSION)
-QUIKR_CFLAGS= -O3 -s -mtune=native -Wextra -Wall -lm -lz -std=gnu99 -D$(UNAME) -DVERSION=$(VERSION)
+QUIKR_TRAIN_CFLAGS = -D$(UNAME) -DVERSION=$(VERSION)
+MULTIFASTA_CFLAGS = -pthread -L../ -I../ -std=gnu99 -fopenmp -D$(UNAME) -DVERSION=$(VERSION)
+QUIKR_CFLAGS = -std=gnu99 -D$(UNAME) -DVERSION=$(VERSION)
 
-all: quikr_train_ quikr_ multifasta_to_otu_
+ifndef DEBUG
+CFLAGS = -O3 -s -mtune=native -Wextra -Wall -lm -lz
+else 
+CFLAGS = -ggdb3 -O0 -Wall -Wextra -lm -lz
+endif
 
-multifasta_to_otu_:
-	$(CC) multifasta_to_otu.c quikr_functions.c nnls.c -o multifasta_to_otu $(MULTIFASTA_CFLAGS)
-quikr_train_:
-	$(CC) quikr_train.c quikr_functions.c -o quikr_train $(QUIKR_TRAIN_CFLAGS)
-quikr_:
-	$(CC) quikr.c quikr_functions.c nnls.c -o quikr $(QUIKR_CFLAGS) -I../
+all: nnls.o kmer_utils.o quikr_train quikr multifasta_to_otu
+
+nnls.o: nnls.c
+	$(CC) -c nnls.c -o nnls.o  $(CFLAGS)
+kmer_utils.o: kmer_utils.c 
+	$(CC) -c kmer_utils.c -o kmer_utils.o  $(CFLAGS)
+multifasta_to_otu: kmer_utils.o nnls.o multifasta_to_otu.c
+	$(CC) multifasta_to_otu.c quikr_functions.c nnls.o kmer_utils.o -o multifasta_to_otu $(CFLAGS) $(MULTIFASTA_CFLAGS)
+quikr_train: kmer_utils.o quikr_train.c
+	$(CC) quikr_train.c quikr_functions.c -o quikr_train $(CFLAGS) $(QUIKR_TRAIN_CFLAGS)
+quikr: kmer_utils.o nnls.o quikr.c
+	$(CC) quikr.c quikr_functions.c nnls.o kmer_utils.o -o quikr $(CFLAGS) $(QUIKR_CFLAGS) -I../
 clean:
-	rm -vf quikr_train quikr multifasta_to_otu
+	rm -vf quikr_train quikr multifasta_to_otu *.o
