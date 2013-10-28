@@ -8,30 +8,38 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include "kmer_utils.h"
 #include "quikr_functions.h"
 
 #define USAGE "Usage:\n\tquikr_train [OPTION...] - train a database for use with quikr.\n\nOptions:\n\n-i, --input\n\tthe database of sequences to create the sensing matrix (fasta format)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-o, --output\n\tthe sensing matrix. (a gzip'd text file)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
-  char probabilities_command[512];
+	// getline variables
   char *line = NULL;
-  char *val;
   size_t len = 0;
+  ssize_t read;
 
 
   int c;
+
+	// k-mer is 6 by default
   int kmer = 6;
 
-  char *fasta_file = NULL;
-  char *output_file = NULL;
-
-  int x = 0;
-  int y = 0;
+	// revision number
+	int revision = 0;
+	// iterators
+	long long i = 0;
+	long long position = 0;
 
   int verbose = 0;
 
+
+  char *fasta_filename = NULL;
+  char *output_file = NULL;
+
   gzFile output = NULL;
+  FILE *input = NULL;
 
   while (1) {
     static struct option long_options[] = {
@@ -53,7 +61,7 @@ int main(int argc, char **argv) {
 
     switch (c) {
       case 'i':
-        fasta_file = optarg;
+        fasta_filename = optarg;
         break;
       case 'k':
         kmer = atoi(optarg);
@@ -80,8 +88,7 @@ int main(int argc, char **argv) {
     }
   }
 
-
-  if(fasta_file == NULL) {
+  if(fasta_filename == NULL) {
     fprintf(stderr, "Error: input fasta file (-i) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
@@ -95,14 +102,19 @@ int main(int argc, char **argv) {
 
   if(verbose) {
     printf("kmer size: %d\n", kmer);
-    printf("fasta file: %s\n", fasta_file);
+    printf("fasta file: %s\n", fasta_filename);
     printf("output file: %s\n", output_file);
   }
 
-  if(access (fasta_file, F_OK) == -1) {
-    fprintf(stderr, "Error: could not find %s\n", fasta_file);
+  if(access (fasta_filename, F_OK) == -1) {
+    fprintf(stderr, "Error: could not find %s\n", fasta_filename);
     exit(EXIT_FAILURE);
   }
+
+	if(kmer == 0) {
+    fprintf(stderr, "Error: zero is not a valid kmer\n");
+    exit(EXIT_FAILURE);
+	}
 
   if(strcmp(&output_file[strlen(output_file) - 3], ".gz") != 0) {
     char *temp = malloc(strlen(output_file) + 4);
@@ -115,74 +127,131 @@ int main(int argc, char **argv) {
     printf("appending a .gz to our output file: %s\n", output_file);
   }
 
-  // 4 ^ Kmer gives us the width, or the number of permutations of ACTG with kmer length
-  int width = pow(4, kmer);
-  int sequences = count_sequences(fasta_file);
+	// 4 ^ Kmer gives us the width, or the number of permutations of ACTG with
+	// kmer length
+  long width = pow(4, kmer);
+  unsigned long sequences = count_sequences(fasta_filename);
   if(sequences == 0) {
-    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", fasta_file);
+    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", fasta_filename);
   }
 
-  if(verbose)
-    printf("sequences: %d\nwidth: %d\n", sequences, width);
+  if(verbose) {
+    printf("sequences: %ld\nwidth: %ld\n", sequences, width);
+    printf("Writing our sensing matrix to %s\n", output_file);
+	}
 
-  // Allocate our matrix with the appropriate size, just one row
-  double *trained_matrix = malloc(width*sizeof(double));
-  if(trained_matrix == NULL) {
-    fprintf(stderr, "Could not allocate enough memory\n");
-    exit(EXIT_FAILURE);
-  }
-
-  // call the probabilities-by-read command
-  sprintf(probabilities_command, "generate_kmers %d | probabilities-by-read %d %s /dev/stdin", kmer, kmer, fasta_file);
-  FILE *probabilities_output = popen(probabilities_command, "r");
-  if(probabilities_output == NULL) {
-    fprintf(stderr, "Error could not execute: %s\n", probabilities_command);
+  input = fopen(fasta_filename, "r" );
+  if(input == NULL) {
+    fprintf(stderr, "Error opening %s - %s\n", fasta_filename, strerror(errno));
     exit(EXIT_FAILURE);
   }
 
   // open our output file
-  output = gzopen(output_file, "w6");
+  output = gzopen(output_file, "w");
   if(output == NULL) {
-    fprintf(stderr, "Error: could not open output file, error code: %d", errno);
+    fprintf(stderr, "Error: could not open output file, error code: %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
 
-  if(verbose)
-    printf("Writing our sensing matrix to %s\n", output_file);
+	// create our header 
+	gzprintf(output, "quikr\n");
+	gzprintf(output, "%ld\n", revision);
+	gzprintf(output, "%ld\n", sequences);
+	gzprintf(output, "%d\n", kmer);
 
-  // read normalize and write our matrix  in one go
-  for(x = 0; x < sequences; x++) {
+	// malloc our return array
+  unsigned long long * counts = malloc((width+ 1) * sizeof(unsigned long long));
+  if(counts == NULL)  {
+		fprintf(stderr, strerror(errno));
+    exit(EXIT_FAILURE);
+	}
 
-    getline(&line, &len, probabilities_output);
 
-    // Read our first element in outside of the loop
-    val = strtok(line,"\t\n\r");
-    trained_matrix[0] = atof(val);
-    // iterate through and load the array
-    for (y = 1; y < width; y++) {
-      val = strtok (NULL, "\t\n\r");
-      trained_matrix[y] = atof(val);
-    }
+	char *str = malloc(4096);
+	if(str == NULL) { 
+		fprintf(stderr, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
-    double row_sum = 0;
+	unsigned long long str_size = 4096;
 
-    for( y = 0; y < width; y++) {
-      row_sum = row_sum + trained_matrix[y];
-    }
+	// seek the first character, and skip over it
+	fseek(input, 1, SEEK_CUR);
+	while ((read = getdelim(&line, &len, '>', input)) != -1) {
 
-    for( y = 0; y < width; y++) {
-      trained_matrix[y] = trained_matrix[y] / row_sum;
-    }
+		// find first whitespace
+		for(i = 0; i < read; i ++) {
+			if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
+				break;
+		}
+		
+		// write our header
+    gzprintf(output, ">%.*s\n", i, line);
 
-    for( y = 0; y < (width - 1); y++) {
-      gzprintf(output, "%.10f\t", trained_matrix[y]);
-    }
-    gzprintf(output, "%.10f\n", trained_matrix[width]);
-  }
+		// find our first \n, this should be the end of the header
+		char *start = strchr(line, '\n');	
+		if(start == NULL) 
+			continue;
 
-  free(trained_matrix);
+		size_t start_len = strlen(start);
+
+
+		// if our current str buffer isn't big enough, realloc
+		if(start_len + 1 > str_size + 1) { 
+			str = realloc(str, start_len + 1);
+			if(str == NULL) { 
+				exit(EXIT_FAILURE);
+				fprintf(stderr, strerror(errno));
+			}
+		}
+
+		// strip out all other newlines to handle multiline sequences
+		str = strnstrip(start, str, '\n',start_len);
+		size_t seq_length = strlen(str);
+
+		// relace A, C, G and T with 0, 1, 2, 3 respectively
+		// everything else is 5 
+		for(i = 0; i < seq_length; i++) {
+			str[i] = alpha[(int)str[i]];
+		}
+		
+		// set counts to zero
+		memset(counts, 0, width);
+		// loop through our string to process each k-mer
+		for(position = 0; position < (seq_length - kmer + 1); position++) {
+			unsigned long mer = 0;
+			unsigned long multiply = 1;
+
+			// for each char in the k-mer check if it is an error char
+			for(i = position + kmer - 1; i >= position; i--){
+				if(str[i] >> 2) { 
+					mer = width;
+					position = i;
+					goto next;
+				}
+
+				// multiply this char in the mer by the multiply
+				// and bitshift the multiply for the next round
+				mer += str[i] * multiply;
+				multiply = multiply << 2;
+			}
+			// use this point to get mer of our loop
+			next:
+			// bump up the mer value in the counts array
+			counts[mer]++;
+		}
+
+		for(i = 0; i < width; i++) {
+			gzprintf(output, "%lld\n", counts[i]);
+		}
+
+	} 
+
+	free(counts);
+	free(line);
+
   gzclose(output);
-  pclose(probabilities_output);
+  fclose(input);
 
-  return 0;
+  return EXIT_SUCCESS;
 }
