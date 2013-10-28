@@ -1,28 +1,36 @@
-#include <stdio.h>
-#include <stdio.h>
-#include <errno.h>
 #include <ctype.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include <errno.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <zlib.h>
 
-int count_sequences(char *filename) { 
-  char command[512];
-  long sequences = 0;
-  FILE *grep_output;
+#include "quikr.h"
 
-  sprintf(command, "grep -c ^\\> %s", filename);
-  grep_output = popen(command, "r");
-  if(grep_output == NULL) {
-    fprintf(stderr, "Could not execute %s\n", command);
+unsigned long long count_sequences(const char *filename) { 
+
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+
+  unsigned long long sequences = 0;
+
+  FILE *fh = fopen(filename, "r");
+  if(fh == NULL) {
+    fprintf(stderr, "could not open\"%s\"", filename );
     exit(EXIT_FAILURE);
   }
-  
-  fscanf(grep_output, "%ld", &sequences);
 
-  pclose(grep_output);
+  while ((read = getline(&line, &len, fh)) != -1) {
+    if(line[0] == '>') 
+      sequences++;
+  }
+
+  free(line);
+  fclose(fh);
+
   return sequences;
 }
 
@@ -42,7 +50,7 @@ void normalize_matrix(double *matrix, long height, long width) {
 }
 
 
-double *load_count_matrix(char *filename, long width, int kmer) {
+double *load_count_matrix(const char *filename, const long width, const int kmer) {
 
   double *count_matrix = malloc(width*sizeof(double));
   char count_command[1024];
@@ -83,36 +91,122 @@ double *load_count_matrix(char *filename, long width, int kmer) {
 }
 
 
-double *load_sensing_matrix(char *filename, long height, long width) {
+struct sensing_matrix *load_sensing_matrix(const char *filename) {
 
-  long x = 0;
-  long y = 0;
+	char *line = NULL;
+	char **headers = NULL;
 
-  gzFile sensing_matrix_fh = NULL;
+	double *matrix = NULL;
 
-  double *sensing_matrix = malloc(height * width * sizeof(double));
-  if(sensing_matrix == NULL) {
-    fprintf(stderr, "Could not allocate memory for the sensing matrix\n");
-  }
+	int kmer = 0;
+	
+	unsigned long long i = 0;	
+	unsigned long long *row = NULL;
+	unsigned long long sequences = 0;
+	unsigned long long width = 0;
 
-  sensing_matrix_fh = gzopen(filename, "r");
-  if(sensing_matrix_fh == NULL) {
+ 	struct matrix *ret = NULL;
+
+  gzFile fh = NULL;
+
+  fh = gzopen(filename, "r");
+  if(fh == NULL) {
     fprintf(stderr, "could not open %s", filename);
     exit(EXIT_FAILURE);
   }
 
-  // read our sensing matrix in
-  for(x = 0; x < height; x++) {
-    for (y = 1; y < width; y++) {
-      char buffer[14];
-      gzgets(sensing_matrix_fh, buffer, 14); 
-      sensing_matrix[width*x + y] = atof(buffer);
-    }
+	line = malloc(1024 * sizeof(char));
+	if(line == NULL) 
+		exit(EXIT_FAILURE);
+
+	// Check for quikr
+	line = gzgets(fh, line, 1024);
+	if(strcmp(line, "quikr\n") != 0) {
+		fprintf(stderr, "This does not look like a quikr sensing matrix. Please check your path\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// check version
+	line = gzgets(fh, line, 1024);
+	if(atoi(line) != MATRIX_REVISION) {
+		fprintf(stderr, "Sensing Matrix uses an unsupported version, please retrain your matrix\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// get number of sequences
+	line = gzgets(fh, line, 1024);
+	sequences = strtoull(line, NULL, 10);
+	if(sequences == 0) {
+		fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// get kmer
+	gzgets(fh, line, 1024);
+	kmer = atoi(line);
+	if(kmer == 0) {
+		fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+		exit(EXIT_FAILURE);
+	}
+
+	width = pow_four(kmer);
+
+	// allocate a +1 size for the extra row
+  matrix = malloc(sequences * (width + 1) * sizeof(double));
+  if(matrix == NULL) {
+    fprintf(stderr, "Could not allocate memory for the sensing matrix\n");
   }
 
-  gzclose(sensing_matrix_fh);
+	row = malloc(width * sizeof(unsigned long long));
+	if(row == NULL) {
+		fprintf(stderr, "Could not allocate memory for parsing row\n");
+	}
+	
+  headers = malloc(sequences * sizeof(char *));
+  if(headers == NULL) {
+    fprintf(stderr, "could not allocated enough memory\n");
+    exit(EXIT_FAILURE);
+  }
 
-  return sensing_matrix;
+	for(i = 0; i < sequences; i++) {
+		unsigned long long sum = 0;
+		unsigned long long j = 0;
+		// get header and add it to headers array 
+		char *header = malloc(256 * sizeof(char));
+		gzgets(fh, header, 256);
+		headers[i] = header+1;
+
+		for(j = 0; j < width; j++) {
+			line = gzgets(fh, line, 32);
+			if(line == NULL || line[0] == '>') {
+				fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+				exit(EXIT_FAILURE);
+			}
+
+			row[j] = strtoull(line, NULL, 10);
+			if(errno)
+				exit(EXIT_FAILURE);
+
+			sum += row[j];
+		}
+		for(j = 1; j < width+1; j++) { 
+			matrix[i*width + j] = ((double)row[j-1]) / sum;
+		}
+	}
+
+	// load the matrix of counts
+  gzclose(fh);
+
+	free(line);
+	free(row);
+
+	ret = malloc(sizeof(struct matrix));
+	(*ret).kmer = kmer;
+	(*ret).sequences = sequences;
+	(*ret).matrix = matrix;
+	(*ret).headers = headers;
+
+  return ret;
 }
 
 
