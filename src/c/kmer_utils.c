@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "quikr.h"
+
 const unsigned char alpha[256] = 
 {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -16,13 +18,9 @@ const unsigned char alpha[256] =
 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
-inline unsigned long long pow_four(unsigned long long x) {
-	return (unsigned long long)1 << (x * 2);
-}
-
 // convert a string of k-mer size base-4 values  into a
 // base-10 index
-inline unsigned long num_to_index(const char *str, const int kmer, int *position, const long error_pos) {
+unsigned long num_to_index(const char *str, const int kmer, const long error_pos) {
 
   int i = 0;
   unsigned long out = 0;
@@ -31,7 +29,7 @@ inline unsigned long num_to_index(const char *str, const int kmer, int *position
   for(i = kmer - 1; i >= 0; i--){
 
 		if(str[i] >> 2) { 
-			position += i;
+			// position += i;
 			return error_pos;
 		}
 
