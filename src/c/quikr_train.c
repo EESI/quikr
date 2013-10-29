@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 	gzprintf(output, "%d\n", kmer);
 
 	// malloc our return array
-  unsigned long long * counts = malloc((width+ 1) * sizeof(unsigned long long));
+  unsigned long long * counts = malloc((width + 1) * sizeof(unsigned long long));
   if(counts == NULL)  {
 		fprintf(stderr, strerror(errno));
     exit(EXIT_FAILURE);
@@ -216,7 +216,8 @@ int main(int argc, char **argv) {
 		}
 		
 		// set counts to zero
-		memset(counts, 0, width);
+		memset(counts, 0, width * sizeof(counts));
+
 		// loop through our string to process each k-mer
 		for(position = 0; position < (seq_length - kmer + 1); position++) {
 			unsigned long mer = 0;
