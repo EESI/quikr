@@ -35,9 +35,10 @@ unsigned long long count_sequences(const char *filename) {
 }
 
 
-void normalize_matrix(double *matrix, long height, long width) {
-  long x = 0;
-  long y = 0;
+void normalize_matrix(double *matrix, unsigned long long height, unsigned long long width) {
+  unsigned long long x = 0;
+  unsigned long long y = 0;
+
   for(x = 0; x < height; x++) {
 
     double row_sum = 0;
@@ -50,11 +51,11 @@ void normalize_matrix(double *matrix, long height, long width) {
 }
 
 
-double *load_count_matrix(const char *filename, const long width, const int kmer) {
+double *load_count_matrix(const char *filename, const unsigned long long width, const unsigned int kmer) {
 
   double *count_matrix = malloc(width*sizeof(double));
   char count_command[1024];
-  long x = 0;
+  unsigned long long x = 0;
   char *line = NULL;
   size_t len = 0;
 
