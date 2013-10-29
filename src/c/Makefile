@@ -3,12 +3,14 @@ UNAME := $(shell uname)
 CC = gcc
 QUIKR_TRAIN_CFLAGS = -D$(UNAME) -DVERSION=$(VERSION)
 MULTIFASTA_CFLAGS = -pthread -L../ -I../ -std=gnu99 -fopenmp -D$(UNAME) -DVERSION=$(VERSION)
-QUIKR_CFLAGS = -std=gnu99 -D$(UNAME) -DVERSION=$(VERSION)
+QUIKR_CFLAGS = -D$(UNAME) -DVERSION=$(VERSION)
+CFLAGS = -Wall -Wextra -lm -lz 
+
 
 ifndef DEBUG
-CFLAGS = -O3 -s -mtune=native -Wextra -Wall -lm -lz
+CFLAGS += -O3 -s -mtune=native 
 else 
-CFLAGS = -ggdb3 -O0 -Wall -Wextra -lm -lz
+CFLAGS += -ggdb3 -O0 
 endif
 
 all: nnls.o kmer_utils.o quikr_train quikr multifasta_to_otu
