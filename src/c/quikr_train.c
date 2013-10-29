@@ -29,8 +29,9 @@ int main(int argc, char **argv) {
 	// revision number
 	int revision = 0;
 	// iterators
-	long long i = 0;
-	long long position = 0;
+  long long i = 0;
+  unsigned long long j = 0;
+	unsigned long long position = 0;
 
   int verbose = 0;
 
@@ -129,14 +130,14 @@ int main(int argc, char **argv) {
 
 	// 4 ^ Kmer gives us the width, or the number of permutations of ACTG with
 	// kmer length
-  long width = pow(4, kmer);
-  unsigned long sequences = count_sequences(fasta_filename);
+  unsigned long width = pow(4, kmer);
+  unsigned long long sequences = count_sequences(fasta_filename);
   if(sequences == 0) {
     fprintf(stderr, "Error: %s contains 0 fasta sequences\n", fasta_filename);
   }
 
   if(verbose) {
-    printf("sequences: %ld\nwidth: %ld\n", sequences, width);
+    printf("sequences: %llu\nwidth: %ld\n", sequences, width);
     printf("Writing our sensing matrix to %s\n", output_file);
 	}
 
@@ -165,7 +166,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, strerror(errno));
     exit(EXIT_FAILURE);
 	}
-
 
 	char *str = malloc(4096);
 	if(str == NULL) { 
@@ -211,8 +211,8 @@ int main(int argc, char **argv) {
 
 		// relace A, C, G and T with 0, 1, 2, 3 respectively
 		// everything else is 5 
-		for(i = 0; i < seq_length; i++) {
-			str[i] = alpha[(int)str[i]];
+		for(j = 0; j < seq_length; j++) {
+			str[j] = alpha[(int)str[j]];
 		}
 		
 		// set counts to zero
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 			unsigned long multiply = 1;
 
 			// for each char in the k-mer check if it is an error char
-			for(i = position + kmer - 1; i >= position; i--){
+			for(i = position + kmer - 1; i >= (signed)position; i--){
 				if(str[i] >> 2) { 
 					mer = width;
 					position = i;
@@ -242,8 +242,8 @@ int main(int argc, char **argv) {
 			counts[mer]++;
 		}
 
-		for(i = 0; i < width; i++) {
-			gzprintf(output, "%lld\n", counts[i]);
+		for(j = 0; j < width; j++) {
+			gzprintf(output, "%lld\n", counts[j]);
 		}
 
 	} 
