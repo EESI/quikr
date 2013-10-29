@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 		}
 		
 		// set counts to zero
-		memset(counts, 0, width * sizeof(counts));
+		memset(counts, 0, width * sizeof(unsigned long long));
 
 		// loop through our string to process each k-mer
 		for(position = 0; position < (seq_length - kmer + 1); position++) {
