@@ -23,15 +23,15 @@ int main(int argc, char **argv) {
   char *sensing_matrix_filename = NULL;
   char *output_filename = NULL;
 
-  long x = 0;
-  long y = 0;
+  unsigned long long x = 0;
+  unsigned long long y = 0;
+
+  unsigned long long width = 0;
+
+  unsigned int kmer = 6;
+  unsigned long long lambda = 10000;
 
   int verbose = 0;
-
-  int lambda = 10000;
-  int kmer = 6;
-
-  long width = 0;
 
   while (1) {
     static struct option long_options[] = {
@@ -105,8 +105,8 @@ int main(int argc, char **argv) {
   }
 
   if(verbose) { 
-    printf("kmer: %d\n", kmer);
-    printf("lambda: %d\n", lambda);
+    printf("kmer: %u\n", kmer);
+    printf("lambda: %llu\n", lambda);
     printf("fasta: %s\n", input_fasta_filename);
     printf("sensing matrix: %s\n", sensing_matrix_filename);
     printf("output: %s\n", output_filename);
@@ -132,8 +132,12 @@ int main(int argc, char **argv) {
 
 	// load counts matrix
 	unsigned long long *integer_counts = get_kmer_counts_from_file(input_fasta_filename, kmer);
-
 	double *count_matrix = malloc(sizeof(double) * width);
+	if(count_matrix == NULL) {
+		fprintf(stderr, "Could not allocate memory:\n");
+		exit(EXIT_FAILURE);
+	}
+
 	count_matrix[0] = 0; 
 
 	for(x = 1; x < width ; x++)
