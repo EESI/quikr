@@ -28,7 +28,6 @@ int main(int argc, char **argv) {
 
   char *input_fasta_directory = NULL;
   char *sensing_matrix_filename = NULL;
-  char *sensing_fasta_filename = NULL;
   char *output_filename = NULL;
 
   unsigned long long x = 0;
@@ -63,7 +62,6 @@ int main(int argc, char **argv) {
       {"lambda",  required_argument, 0, 'l'},
       {"jobs",  required_argument, 0, 'j'},
       {"output", required_argument, 0, 'o'},
-      {"sensing-fasta",  required_argument, 0, 'f'},
       {"sensing-matrix", required_argument, 0, 's'},
       {"verbose", no_argument, 0, 'v'},
       {"help", no_argument, 0, 'h'},
@@ -72,7 +70,7 @@ int main(int argc, char **argv) {
     };
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "k:l:f:s:i:o:j:hvV", long_options, &option_index);
+    c = getopt_long (argc, argv, "k:l:s:i:o:j:hvV", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -83,9 +81,6 @@ int main(int argc, char **argv) {
         break;
       case 'l':
         lambda = atoi(optarg);
-        break;
-      case 'f':
-        sensing_fasta_filename = optarg;
         break;
       case 's':
         sensing_matrix_filename = optarg;
@@ -120,11 +115,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }
-  if(sensing_fasta_filename == NULL) {
-    fprintf(stderr, "Error: sensing fasta filename (-f) must be specified\n\n");
-    fprintf(stderr, "%s\n", USAGE);
-    exit(EXIT_FAILURE);
-  }
   if(output_filename == NULL) {
     fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
@@ -141,7 +131,6 @@ int main(int argc, char **argv) {
     printf("lambda: %llu\n", lambda);
     printf("input directory: %s\n", input_fasta_directory);
     printf("sensing database: %s\n", sensing_matrix_filename);
-    printf("sensing database fasta: %s\n", sensing_fasta_filename);
     printf("output: %s\n", output_filename);
     printf("number of jobs to run at once: %d\n", jobs); 
   }
@@ -149,11 +138,6 @@ int main(int argc, char **argv) {
 
   if(access (sensing_matrix_filename, F_OK) == -1) {
     fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
-    exit(EXIT_FAILURE);
-  }
-
-  if(access (sensing_fasta_filename, F_OK) == -1) {
-    fprintf(stderr, "Error: could not find %s\n", sensing_fasta_filename);
     exit(EXIT_FAILURE);
   }
 
@@ -303,8 +287,6 @@ int main(int argc, char **argv) {
     free(sensing_matrix_copy);
   }
 
-  char **headers = load_headers(sensing_fasta_filename, sensing_matrix->sequences);
-
   // output our matrix
   FILE *output_fh = fopen(output_filename, "w");
   if(output_fh == NULL) { 
@@ -337,7 +319,7 @@ int main(int argc, char **argv) {
 
     // if our column is zero, don't bother printing the row
     if(column_sum != 0) {
-      fprintf(output_fh, "%s\t", headers[y]);
+      fprintf(output_fh, "%s\t", sensing_matrix->headers[y]);
 
       for(i = 0; i < dir_count - 1; i++) {
 				fprintf(output_fh, "%d\t", (int)solutions[sensing_matrix->sequences*i + y]);
