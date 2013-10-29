@@ -91,7 +91,7 @@ double *load_count_matrix(const char *filename, const long width, const int kmer
 }
 
 
-struct sensing_matrix *load_sensing_matrix(const char *filename) {
+struct matrix *load_sensing_matrix(const char *filename) {
 
 	char *line = NULL;
 	char **headers = NULL;
@@ -137,7 +137,7 @@ struct sensing_matrix *load_sensing_matrix(const char *filename) {
 	line = gzgets(fh, line, 1024);
 	sequences = strtoull(line, NULL, 10);
 	if(sequences == 0) {
-		fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+		fprintf(stderr, "Error parsing sensing matrix, sequence count is zero\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -145,7 +145,7 @@ struct sensing_matrix *load_sensing_matrix(const char *filename) {
 	gzgets(fh, line, 1024);
 	kmer = atoi(line);
 	if(kmer == 0) {
-		fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+		fprintf(stderr, "Error parsing sensing matrix, kmer is zero\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -164,7 +164,7 @@ struct sensing_matrix *load_sensing_matrix(const char *filename) {
 	
   headers = malloc(sequences * sizeof(char *));
   if(headers == NULL) {
-    fprintf(stderr, "could not allocated enough memory\n");
+    fprintf(stderr, "could not allocate enough memory for header pointers\n");
     exit(EXIT_FAILURE);
   }
 
@@ -174,18 +174,25 @@ struct sensing_matrix *load_sensing_matrix(const char *filename) {
 		// get header and add it to headers array 
 		char *header = malloc(256 * sizeof(char));
 		gzgets(fh, header, 256);
+		if(header[0] != '>') {
+			fprintf(stderr, "Error parsing sensing matrix, could not read header\n");
+			exit(EXIT_FAILURE);
+		}
+
 		headers[i] = header+1;
 
 		for(j = 0; j < width; j++) {
 			line = gzgets(fh, line, 32);
 			if(line == NULL || line[0] == '>') {
-				fprintf(stderr, "Error parsing sensing matrix, please retrain your matrix\n");
+				fprintf(stderr, "Error parsing sensing matrix, line does not look like a value\n");
 				exit(EXIT_FAILURE);
 			}
 
 			row[j] = strtoull(line, NULL, 10);
-			if(errno)
+			if(errno) {
+				printf("could not parse '%s'\n into a number", line);
 				exit(EXIT_FAILURE);
+			}
 
 			sum += row[j];
 		}
