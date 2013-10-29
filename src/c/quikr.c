@@ -10,18 +10,17 @@
 #include "nnls.h"
 #include "kmer_utils.h"
 #include "quikr_functions.h"
+#include "quikr.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
 #define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
-
   int c;
 
   char *input_fasta_filename = NULL;
   char *sensing_matrix_filename = NULL;
-  char *sensing_fasta_filename = NULL;
   char *output_filename = NULL;
 
   long x = 0;
@@ -33,7 +32,6 @@ int main(int argc, char **argv) {
   int kmer = 6;
 
   long width = 0;
-  long sequences = 0;
 
   while (1) {
     static struct option long_options[] = {
@@ -63,9 +61,6 @@ int main(int argc, char **argv) {
         break;
       case 'l':
         lambda = atoi(optarg);
-        break;
-      case 'f':
-        sensing_fasta_filename = optarg;
         break;
       case 's':
         sensing_matrix_filename = optarg;
@@ -98,11 +93,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%s\n", USAGE);
     exit(EXIT_FAILURE);
   }
-  if(sensing_fasta_filename == NULL) {
-    fprintf(stderr, "Error: sensing fasta filename (-f) must be specified\n\n");
-    fprintf(stderr, "%s\n", USAGE);
-    exit(EXIT_FAILURE);
-  }
   if(output_filename == NULL) {
     fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
     fprintf(stderr, "%s\n", USAGE);
@@ -118,17 +108,12 @@ int main(int argc, char **argv) {
     printf("kmer: %d\n", kmer);
     printf("lambda: %d\n", lambda);
     printf("fasta: %s\n", input_fasta_filename);
-    printf("sensing database: %s\n", sensing_matrix_filename);
-    printf("sensing database fasta: %s\n", sensing_fasta_filename);
+    printf("sensing matrix: %s\n", sensing_matrix_filename);
     printf("output: %s\n", output_filename);
   }
 
   if(access (sensing_matrix_filename, F_OK) == -1) {
     fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
-    exit(EXIT_FAILURE);
-  }
-  if(access (sensing_fasta_filename, F_OK) == -1) {
-    fprintf(stderr, "Error: could not find %s\n", sensing_fasta_filename);
     exit(EXIT_FAILURE);
   }
   if(access (input_fasta_filename, F_OK) == -1) {
@@ -144,16 +129,6 @@ int main(int argc, char **argv) {
   // 4 "ACGT" ^ Kmer gives us the size of output rows
   width = pow(4, kmer);
   width = width + 1;
-
-  sequences = count_sequences(sensing_fasta_filename);
-  if(sequences == 0) {
-    fprintf(stderr, "Error: %s contains 0 fasta sequences\n", sensing_fasta_filename);
-  }
-
-  if(verbose) {
-    printf("width: %ld\nsequences %ld\n", width, sequences);
-  }
-
 
 	// load counts matrix
 	unsigned long long *integer_counts = get_kmer_counts_from_file(input_fasta_filename, kmer);
@@ -173,25 +148,30 @@ int main(int argc, char **argv) {
     count_matrix[x] = count_matrix[x] * lambda;
 
 	// load sensing matrix
-  double *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, sequences, width);
+  struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename);
+	if(sensing_matrix->kmer != kmer) {
+		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
+		exit(EXIT_FAILURE);
+	}
 
+		
   // multiply our sensing matrix by lambda
-  for(x = 1; x < sequences; x++) {
-    for(y= 0; y < width - 1; y++) {
-      sensing_matrix(x, y) = sensing_matrix(x, y) * lambda;
+  for(x = 1; x < sensing_matrix->sequences; x++) {
+    for(y = 0; y < width - 1; y++) {
+      sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
     }
-  }
+	}
 
 	// set the first column of our sensing matrix to 0
-  for(x = 0; x < sequences; x++) {
-    sensing_matrix(x, 0) = 1.0;
+  for(x = 0; x < sensing_matrix->sequences; x++) {
+    sensing_matrix->matrix[width * x] = 1.0;
   }
   
 	// run NNLS
-  double *solution = nnls(sensing_matrix, count_matrix, sequences, width);
+  double *solution = nnls(sensing_matrix->matrix, count_matrix, sensing_matrix->sequences, width);
 
   // normalize our solution vector
-  normalize_matrix(solution, 1, sequences);
+  normalize_matrix(solution, 1, sensing_matrix->sequences);
 
   // output our matrix
   FILE *output_fh = fopen(output_filename, "w");
@@ -199,7 +179,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Could not open %s for writing\n", output_filename);
     exit(EXIT_FAILURE);
   }
-  for(x = 0; x < sequences; x++) {
+  for(x = 0; x < sensing_matrix->sequences; x++) {
       fprintf(output_fh, "%.10lf\n", solution[x]);
   }
   fclose(output_fh);
