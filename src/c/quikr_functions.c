@@ -181,6 +181,8 @@ struct matrix *load_sensing_matrix(const char *filename) {
 
 		headers[i] = header+1;
 
+		row = memset(row, 0, (width + 1) * sizeof(unsigned long long));
+
 		for(j = 0; j < width; j++) {
 			line = gzgets(fh, line, 32);
 			if(line == NULL || line[0] == '>') {
@@ -197,7 +199,7 @@ struct matrix *load_sensing_matrix(const char *filename) {
 			sum += row[j];
 		}
 		for(j = 1; j < width+1; j++) { 
-			matrix[i*width + j] = ((double)row[j-1]) / sum;
+			matrix[i*(width+1) + j] = ((double)row[j-1]) / sum;
 		}
 	}
 
