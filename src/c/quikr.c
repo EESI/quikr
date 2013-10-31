@@ -13,7 +13,7 @@
 #include "quikr.h"
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
+#define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
@@ -38,7 +38,6 @@ int main(int argc, char **argv) {
       {"kmer",  required_argument, 0, 'k'},
       {"lambda",  required_argument, 0, 'l'},
       {"output", required_argument, 0, 'o'},
-      {"sensing-fasta",  required_argument, 0, 'f'},
       {"sensing-matrix", required_argument, 0, 's'},
       {"verbose", no_argument, 0, 'v'},
       {"version", no_argument, 0, 'V'},
@@ -49,7 +48,7 @@ int main(int argc, char **argv) {
 
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "k:l:f:s:i:o:hdvV", long_options, &option_index);
+    c = getopt_long (argc, argv, "k:l:s:i:o:hdvV", long_options, &option_index);
 
     if (c == -1)
       break;

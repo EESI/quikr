@@ -5,8 +5,6 @@ quikr \- Calculate estimated frequencies of bacteria in a sample.
 .B quikr
 .RB [ \-i
 .IR input]
-.RB [ \-f
-.IR sensing-fasta]
 .RB [ \-s
 .IR sensing-matrix]
 .RB [ \-l
@@ -29,9 +27,6 @@ input FASTA file and a trained sensing matrix
 .B \-i, --input
 the sample's fasta file of NGS. READS (fasta format)
 .TP
-.B \-f, --sensing-fasta
-location of the fasta file database used to create the sensing matrix. (fasta format)
-.TP
 .B \-s, --sensing-matrix
 location of the sensing matrix. (trained from quikr_train)
 .TP
@@ -52,7 +47,7 @@ print version.
 .SH EXAMPLES
 Use quikr to calculate the estimated frequencies for sample.fa, using rdp7.fasta as the sensing matrix we generated with quikr_train. This uses 6-mers by default, and a lambda value of 10000:
 .P
-quikr -i sample.fa -f rdp7.fa -s rdp_sensing_matrix.gz -o frequencies.txt
+quikr -i sample.fa -s rdp_sensing_matrix.gz -o frequencies.txt
 .SH "SEE ALSO"
 \fBmultifasta_to_otu\fP(1), \fBquikr_train\fP(1).
 .SH AUTHORS
