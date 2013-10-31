@@ -116,6 +116,8 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 		// strip out all other newlines to handle multiline sequences
 		str = strnstrip(start, str, '\n',start_len);
 		size_t seq_length = strlen(str);
+		if(seq_length < kmer)
+			continue;
 
 		// relace A, C, G and T with 0, 1, 2, 3 respectively
 		// everything else is 5 
