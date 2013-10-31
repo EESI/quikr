@@ -134,6 +134,7 @@ int main(int argc, char **argv) {
   unsigned long long sequences = count_sequences(fasta_filename);
   if(sequences == 0) {
     fprintf(stderr, "Error: %s contains 0 fasta sequences\n", fasta_filename);
+		exit(EXIT_FAILURE);
   }
 
   if(verbose) {
