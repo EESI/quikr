@@ -10,7 +10,6 @@
 #include "quikr.h"
 
 unsigned long long count_sequences(const char *filename) { 
-
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
@@ -19,8 +18,8 @@ unsigned long long count_sequences(const char *filename) {
 
   FILE *fh = fopen(filename, "r");
   if(fh == NULL) {
-    fprintf(stderr, "could not open\"%s\"", filename );
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "could not open \"%s\"\n", filename );
+		return 0;
   }
 
   while ((read = getline(&line, &len, fh)) != -1) {
@@ -180,6 +179,7 @@ struct matrix *load_sensing_matrix(const char *filename) {
 			exit(EXIT_FAILURE);
 		}
 
+		header[strlen(header) - 1] = '\0';
 		headers[i] = header+1;
 
 		row = memset(row, 0, (width + 1) * sizeof(unsigned long long));
