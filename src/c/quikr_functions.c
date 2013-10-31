@@ -10,6 +10,7 @@
 #include "kmer_utils.h"
 #include "quikr.h"
 
+
 void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {
 	FILE *count_fh = fopen("count.mat", "w");
 	FILE *sensing_fh = fopen("sensing.mat", "w");
@@ -133,7 +134,7 @@ struct matrix *load_sensing_matrix(const char *filename) {
 	// Check for quikr
 	line = gzgets(fh, line, 1024);
 	if(strcmp(line, "quikr\n") != 0) {
-		fprintf(stderr, "This does not look like a quikr sensing matrix. Please check your path\n");
+		fprintf(stderr, "This does not look like a quikr sensing matrix. Please check your path: %s\n", filename);
 		exit(EXIT_FAILURE);
 	}
 
