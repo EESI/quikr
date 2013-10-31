@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 	double *count_matrix = setup_count_matrix(input_fasta_filename, kmer, lambda, width); 
 
 	// load sensing matrix
-	struct matrix *sensing_matrix = setup_sensing_matrix(input_fasta_filename, kmer, lambda, width); 
+	struct matrix *sensing_matrix = setup_sensing_matrix(sensing_matrix_filename, kmer, lambda, width); 
 
 	// run NNLS
   double *solution = nnls(sensing_matrix->matrix, count_matrix, sensing_matrix->sequences, width);
