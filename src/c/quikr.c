@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
 	count_matrix[0] = 0; 
 
-	for(x = 1; x < width ; x++)
+	for(x = 1; x < width; x++)
 		count_matrix[x] = (double)integer_counts[x-1];
 
 	free(integer_counts);
@@ -158,7 +158,6 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-		
   // multiply our sensing matrix by lambda
   for(x = 1; x < sensing_matrix->sequences; x++) {
     for(y = 0; y < width - 1; y++) {
