@@ -80,7 +80,7 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 
 	// malloc our return array
   unsigned long long * counts = malloc((width+ 1) * sizeof(unsigned long long));
-	memset(counts, 0, width);
+	memset(counts, 0, width * sizeof(unsigned long long));
   if(counts == NULL)  {
 		fprintf(stderr, strerror(errno));
     exit(EXIT_FAILURE);
