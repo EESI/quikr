@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
   char *output_filename = NULL;
 
   unsigned long long x = 0;
-  unsigned long long y = 0;
 
   unsigned long long width = 0;
 
@@ -131,45 +130,11 @@ int main(int argc, char **argv) {
   width = width + 1;
 
 	// load counts matrix
-	unsigned long long *integer_counts = get_kmer_counts_from_file(input_fasta_filename, kmer);
-	double *count_matrix = malloc(sizeof(double) * width);
-	if(count_matrix == NULL) {
-		fprintf(stderr, "Could not allocate memory:\n");
-		exit(EXIT_FAILURE);
-	}
-
-	count_matrix[0] = 0; 
-
-	for(x = 1; x < width; x++)
-		count_matrix[x] = (double)integer_counts[x-1];
-
-	free(integer_counts);
-
-  // normalize our count_matrix
-  normalize_matrix(count_matrix, 1, width);
-
-  for(x = 0; x < width; x++) 
-    count_matrix[x] = count_matrix[x] * lambda;
+	double *count_matrix = setup_count_matrix(input_fasta_filename, kmer, lambda, width); 
 
 	// load sensing matrix
-  struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename);
-	if(sensing_matrix->kmer != kmer) {
-		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
-		exit(EXIT_FAILURE);
-	}
+	struct matrix *sensing_matrix = setup_sensing_matrix(input_fasta_filename, kmer, lambda, width); 
 
-  // multiply our sensing matrix by lambda
-  for(x = 1; x < sensing_matrix->sequences; x++) {
-    for(y = 0; y < width - 1; y++) {
-      sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
-    }
-	}
-
-	// set the first column of our sensing matrix to 0
-  for(x = 0; x < sensing_matrix->sequences; x++) {
-    sensing_matrix->matrix[width * x] = 1.0;
-  }
-  
 	// run NNLS
   double *solution = nnls(sensing_matrix->matrix, count_matrix, sensing_matrix->sequences, width);
 

@@ -20,7 +20,7 @@
 
 #define sensing_matrix(i,j) (sensing_matrix[width*i + j])
 #define solutions(i,j) (solutions[sequences*i+ j])
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --sensing-fasta\n\tlocation of the fasta file database used to create the sensing matrix (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
+#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
 
@@ -173,15 +173,15 @@ int main(int argc, char **argv) {
   }
 
   // multiply our matrix by lambda
-  for(x = 0; x < sensing_matrix->sequences; x++) {
-    for(y= 0; y < width; y++) {
-      sensing_matrix->matrix[x*width + y] *= lambda;
+  for(x = 1; x < sensing_matrix->sequences; x++) {
+    for(y = 0; y < width - 1; y++) {
+      sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
     }
   }
 
   // set the first row to be all 1's
   for(x = 0; x < sensing_matrix->sequences; x++) {
-    sensing_matrix->matrix[x*width] = 1.0;
+    sensing_matrix->matrix[width * x] = 1.0;
   }
 
   double *solutions = malloc(dir_count * sensing_matrix->sequences * sizeof(double));
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  long *file_sequence_count = malloc(dir_count * sizeof(long));
+  long *file_sequence_count = calloc(dir_count, sizeof(long));
   if(file_sequence_count == NULL) {
     fprintf(stderr, "Could not allocate enough memory\n");
     exit(EXIT_FAILURE);
@@ -237,27 +237,8 @@ int main(int argc, char **argv) {
     // get individual sequence count
     file_sequence_count[i] =  count_sequences(filename);
 
-    // count the kmer amounts, and convert it to a double array
-		unsigned long long *integer_counts = get_kmer_counts_from_file(filename, kmer);
-		double *count_matrix = malloc(sizeof(double) * width);
-		if(count_matrix == NULL) {
-			fprintf(stderr, "Could not allocate memory:\n");
-			exit(EXIT_FAILURE);
-		}
-
-		count_matrix[0] = 0; 
-
-		for(x = 0; x < width - 1 ; x++)
-			count_matrix[x+1] = (double)integer_counts[x];
-
-		free(integer_counts);
-
-    // normalize our kmer counts
-    normalize_matrix(count_matrix, 1, width);
-
-    // multiply our kmers frequency by lambda
-    for(z = 0; z < width; z++) 
-      count_matrix[z] = count_matrix[z] * lambda;
+    // get our count matrix
+		double *count_matrix = setup_count_matrix(filename, kmer, lambda, width); 
 
     double *sensing_matrix_copy = malloc(sizeof(double) * sensing_matrix->sequences * width);
     if(sensing_matrix_copy == NULL) {

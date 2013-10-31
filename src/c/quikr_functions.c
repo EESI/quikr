@@ -7,7 +7,75 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include "kmer_utils.h"
 #include "quikr.h"
+
+void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {
+	FILE *count_fh = fopen("count.mat", "w");
+	FILE *sensing_fh = fopen("sensing.mat", "w");
+
+	unsigned long long width = pow_four(sensing_matrix->kmer);
+	unsigned long long i = 0;
+	unsigned long long j = 0;
+
+	for(i = 0; i < sensing_matrix->sequences; i++) {
+		for(j = 0; j < width - 1; j++)
+			fprintf(sensing_fh, "%lf\t", sensing_matrix->matrix[width*i + j]);
+		fprintf(sensing_fh, "%lf\n", sensing_matrix->matrix[width*i + width-1]);
+	}
+
+	fclose(sensing_fh);
+
+	for(j = 0; j < width - 1; j++)
+		fprintf(count_fh, "%lf\t", count_matrix[j]);
+	fprintf(count_fh, "%lf\n", count_matrix[width - 1]);
+
+	fclose(count_fh);
+}
+
+
+void normalize_matrix(double *matrix, unsigned long long height, unsigned long long width) {
+  unsigned long long x = 0;
+  unsigned long long y = 0;
+
+  for(x = 0; x < height; x++) {
+
+    double row_sum = 0;
+
+    for(y = 0; y < (width); y++)
+      row_sum = row_sum + matrix[width * x + y];
+    for(y = 0; y < (width); y++) 
+      matrix[width * x + y] = matrix[width * x + y] / row_sum; 
+  }
+}
+
+double *setup_count_matrix(char *filename, unsigned long long kmer, unsigned long long lambda, unsigned long long width) { 
+
+	unsigned long long x = 0;
+	unsigned long long *integer_counts = get_kmer_counts_from_file(filename, kmer);
+	double *count_matrix = malloc(width * sizeof(double));
+	if(count_matrix == NULL) {
+		fprintf(stderr, "Could not allocate memory:\n");
+		exit(EXIT_FAILURE);
+	}
+
+	count_matrix[0] = 0; 
+
+	for(x = 1; x < width; x++) {
+		count_matrix[x] = (double)integer_counts[x-1];
+	}
+
+	free(integer_counts);
+
+	// normalize our kmer counts
+	normalize_matrix(count_matrix, 1, width);
+
+	// multiply our kmers frequency by lambda
+	for(x = 0; x < width; x++) 
+		count_matrix[x] = count_matrix[x] * lambda;
+
+	return count_matrix;
+}
 
 unsigned long long count_sequences(const char *filename) { 
   char *line = NULL;
@@ -31,63 +99,6 @@ unsigned long long count_sequences(const char *filename) {
   fclose(fh);
 
   return sequences;
-}
-
-
-void normalize_matrix(double *matrix, unsigned long long height, unsigned long long width) {
-  unsigned long long x = 0;
-  unsigned long long y = 0;
-
-  for(x = 0; x < height; x++) {
-
-    double row_sum = 0;
-
-    for(y = 0; y < (width); y++)
-      row_sum = row_sum + matrix[width * x + y];
-    for(y = 0; y < (width); y++) 
-      matrix[width * x + y] = matrix[width * x + y] / row_sum; 
-  }
-}
-
-
-double *load_count_matrix(const char *filename, const unsigned long long width, const unsigned int kmer) {
-
-  double *count_matrix = malloc(width*sizeof(double));
-  char count_command[1024];
-  unsigned long long x = 0;
-  char *line = NULL;
-  size_t len = 0;
-
-  if(count_matrix == NULL) {
-    fprintf(stderr, "could not allocate enough memory for the count matrix\n");
-    exit(EXIT_FAILURE);
-  }
-
-  // create out count matrix
-  sprintf(count_command, "count-kmers -r %d -1 -u %s", kmer, filename);
-  FILE *count_output = popen(count_command, "r");
-  if(count_output == NULL) {
-    fprintf(stderr, "could not execute \"%s\"", count_command);
-    exit(EXIT_FAILURE);
-  }
-
-  // set first element to zero.
-  count_matrix[0] = 0;
-
-  // get our first line
-  getline(&line, &len, count_output);
-  count_matrix[1] = atoi(line);
-
-  // iterate over the rest of the lines
-  for(x = 2; x < width; x++) { 
-    getline(&line, &len, count_output);
-    count_matrix[x] = atoi(line);
-  } 
-
-  free(line);
-  pclose(count_output);
-
-  return count_matrix;
 }
 
 
@@ -219,42 +230,26 @@ struct matrix *load_sensing_matrix(const char *filename) {
   return ret;
 }
 
+struct matrix *setup_sensing_matrix(char *filename, unsigned long long kmer, unsigned long long lambda, unsigned long long width) { 
+  unsigned long long x = 0;
+  unsigned long long y = 0;
 
-char **load_headers(char *filename, long sequences) {
-  char command[512];
-  char *line= NULL;
-  long x = 0;
-  FILE *grep_output;
-  size_t len = 0;
+	struct matrix *sensing_matrix = load_sensing_matrix(filename);
+	if(sensing_matrix->kmer != kmer) {
+		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
+		exit(EXIT_FAILURE);
+	}
 
-  sprintf(command, "grep ^\\> %s", filename);
-  grep_output = popen(command, "r");
-  if(grep_output == NULL) {
-    fprintf(stderr, "Could not execute %s\n", command);
-    exit(EXIT_FAILURE);
-  }
-  
-  char **headers = malloc(sequences * sizeof(char *));
-  if(headers == NULL) {
-    fprintf(stderr, "could not allocated enough memory\n");
-    exit(EXIT_FAILURE);
-  }
+	// multiply our sensing matrix by lambda
+	for(x = 1; x < sensing_matrix->sequences; x++) {
+		for(y = 0; y < width - 1; y++) {
+			sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
+		}
+	}
 
-  for(x = 0; x < sequences; x++) {
-
-    char *header = malloc(256 * sizeof(char));
-    if(header == NULL) {
-      fprintf(stderr, "could not allocated enough memory\n");
-      exit(EXIT_FAILURE);
-    }
-    getline(&line, &len, grep_output);
-    sscanf(line + 1, "%s", header);
-    headers[x] = header;
-  }
-
-  free(line);
-  pclose(grep_output);
-
-  return headers;
+	// set the first column of our sensing matrix to 0
+	for(x = 0; x < sensing_matrix->sequences; x++) {
+		sensing_matrix->matrix[width * x] = 1.0;
+	}
+	return sensing_matrix;
 }
-
