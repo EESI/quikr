@@ -10,6 +10,17 @@
 #include "kmer_utils.h"
 #include "quikr.h"
 
+void check_malloc(void *ptr, char *error) {
+	if (ptr == NULL) {
+		if(error != NULL)  {
+			fprintf(stderr,"Error: %s\n", error); 
+		} 
+		else { fprintf(stderr, "Error: Could not allocate enough memory - %s\n", strerror(errno));
+		} 
+		exit(EXIT_FAILURE);
+	}
+}
+
 
 void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {
 	FILE *count_fh = fopen("count.mat", "w");
@@ -55,10 +66,7 @@ double *setup_count_matrix(char *filename, unsigned long long kmer, unsigned lon
 	unsigned long long x = 0;
 	unsigned long long *integer_counts = get_kmer_counts_from_file(filename, kmer);
 	double *count_matrix = malloc(width * sizeof(double));
-	if(count_matrix == NULL) {
-		fprintf(stderr, "Could not allocate memory:\n");
-		exit(EXIT_FAILURE);
-	}
+	check_malloc(count_matrix, NULL);
 
 	count_matrix[0] = 0; 
 
@@ -67,13 +75,6 @@ double *setup_count_matrix(char *filename, unsigned long long kmer, unsigned lon
 	}
 
 	free(integer_counts);
-
-	// normalize our kmer counts
-	normalize_matrix(count_matrix, 1, width);
-
-	// multiply our kmers frequency by lambda
-	for(x = 0; x < width; x++) 
-		count_matrix[x] = count_matrix[x] * lambda;
 
 	return count_matrix;
 }
@@ -103,7 +104,7 @@ unsigned long long count_sequences(const char *filename) {
 }
 
 
-struct matrix *load_sensing_matrix(const char *filename) {
+struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kmer) {
 
 	char *line = NULL;
 	char **headers = NULL;
@@ -128,8 +129,7 @@ struct matrix *load_sensing_matrix(const char *filename) {
   }
 
 	line = malloc(1024 * sizeof(char));
-	if(line == NULL) 
-		exit(EXIT_FAILURE);
+	check_malloc(line, NULL);
 
 	// Check for quikr
 	line = gzgets(fh, line, 1024);
@@ -160,31 +160,28 @@ struct matrix *load_sensing_matrix(const char *filename) {
 		fprintf(stderr, "Error parsing sensing matrix, kmer is zero\n");
 		exit(EXIT_FAILURE);
 	}
+	if(kmer != target_kmer) {
+		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
+		exit(EXIT_FAILURE);
+	}
 
 	width = pow_four(kmer);
 
 	// allocate a +1 size for the extra row
-  matrix = malloc(sequences * (width + 1) * sizeof(double));
-  if(matrix == NULL) {
-    fprintf(stderr, "Could not allocate memory for the sensing matrix\n");
-  }
+  matrix = malloc(sequences * (width) * sizeof(double));
+	check_malloc(matrix, NULL);
 
-	row = malloc(width * sizeof(unsigned long long));
-	if(row == NULL) {
-		fprintf(stderr, "Could not allocate memory for parsing row\n");
-	}
+	row = malloc((width) * sizeof(unsigned long long));
+	check_malloc(row, NULL);
 	
   headers = malloc(sequences * sizeof(char *));
-  if(headers == NULL) {
-    fprintf(stderr, "could not allocate enough memory for header pointers\n");
-    exit(EXIT_FAILURE);
-  }
+	check_malloc(headers, NULL);
 
 	for(i = 0; i < sequences; i++) {
-		unsigned long long sum = 0;
 		unsigned long long j = 0;
 		// get header and add it to headers array 
 		char *header = malloc(256 * sizeof(char));
+		check_malloc(header, NULL);
 		gzgets(fh, header, 256);
 		if(header[0] != '>') {
 			fprintf(stderr, "Error parsing sensing matrix, could not read header\n");
@@ -194,7 +191,7 @@ struct matrix *load_sensing_matrix(const char *filename) {
 		header[strlen(header) - 1] = '\0';
 		headers[i] = header+1;
 
-		row = memset(row, 0, (width + 1) * sizeof(unsigned long long));
+		row = memset(row, 0, (width) * sizeof(unsigned long long));
 
 		for(j = 0; j < width; j++) {
 			line = gzgets(fh, line, 32);
@@ -209,10 +206,9 @@ struct matrix *load_sensing_matrix(const char *filename) {
 				exit(EXIT_FAILURE);
 			}
 
-			sum += row[j];
 		}
-		for(j = 1; j < width+1; j++) { 
-			matrix[i*(width+1) + j] = ((double)row[j-1]) / sum;
+		for(j = 0; j < width; j++) { 
+			matrix[i*(width) + j] = ((double)row[j]);
 		}
 	}
 
@@ -229,28 +225,4 @@ struct matrix *load_sensing_matrix(const char *filename) {
 	(*ret).headers = headers;
 
   return ret;
-}
-
-struct matrix *setup_sensing_matrix(char *filename, unsigned long long kmer, unsigned long long lambda, unsigned long long width) { 
-  unsigned long long x = 0;
-  unsigned long long y = 0;
-
-	struct matrix *sensing_matrix = load_sensing_matrix(filename);
-	if(sensing_matrix->kmer != kmer) {
-		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
-		exit(EXIT_FAILURE);
-	}
-
-	// multiply our sensing matrix by lambda
-	for(x = 1; x < sensing_matrix->sequences; x++) {
-		for(y = 0; y < width - 1; y++) {
-			sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
-		}
-	}
-
-	// set the first column of our sensing matrix to 0
-	for(x = 0; x < sensing_matrix->sequences; x++) {
-		sensing_matrix->matrix[width * x] = 1.0;
-	}
-	return sensing_matrix;
 }
