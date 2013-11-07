@@ -182,9 +182,9 @@ int64_t nnls_algorithm(double *a, int64_t m,int64_t n, double *b, double *x, dou
     return(2);
 
   /* Allocate memory for working space, if required */
-  double *w = (double*)calloc(n, sizeof(double));
-  double *zz = (double*)calloc(m, sizeof(double));
-  int64_t *index = (int64_t*)calloc(n, sizeof(int64_t));
+  double *w = calloc(n, sizeof(double));
+  double *zz = calloc(m, sizeof(double));
+  int64_t *index = calloc(n, sizeof(int64_t));
   if(w == NULL || zz == NULL || index == NULL) 
     return(2);
 
@@ -398,7 +398,7 @@ int64_t nnls_algorithm(double *a, int64_t m,int64_t n, double *b, double *x, dou
 
 double *nnls(double *a_matrix, double *b_matrix, int64_t height, int64_t width) {
 
-  double *solution = (double*)calloc(height, sizeof(double));
+  double *solution = calloc(height, sizeof(double));
 
   if(solution == NULL) {
     fprintf(stderr, "could not allocate enough memory for nnls\n");
