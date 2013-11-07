@@ -153,7 +153,6 @@ int main(int argc, char **argv) {
 	// load sensing matrix
 	struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
 
-
 	// get our "rare" counts
 	while(1) {
 		rare_width = 0;
@@ -217,23 +216,6 @@ int main(int argc, char **argv) {
 		sensing_matrix_rare[x*rare_width] = 1.0;
 	}
 
-	// DEBUG OUR MATRIX
-	if(verbose) {
-		printf("COUNT_MATRIX\n");
-		for(x = 0; x < rare_width; x++) 
-			printf("%lf\t", count_matrix_rare[x]);
-			printf("\n");
-
-		printf("SENSING_MATRIX\n");
-		for(y = 0; y < sensing_matrix->sequences - 1; y++) {
-			for(x = 0; x < rare_width; x++) {
-				printf("%lf\t", sensing_matrix_rare[x*rare_width + y]);
-			}
-			printf("%lf\n", sensing_matrix_rare[x*rare_width + (rare_width - 1)]);
-		}
-
-	}
-
 	// run NNLS
   double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sensing_matrix->sequences, rare_width);
 
@@ -246,9 +228,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Could not open %s for writing\n", output_filename);
     exit(EXIT_FAILURE);
   }
-  for(x = 0; x < sensing_matrix->sequences; x++) {
+
+  for(x = 0; x < sensing_matrix->sequences; x++)
       fprintf(output_fh, "%.10lf\n", solution[x]);
-  }
 
   fclose(output_fh);
 
