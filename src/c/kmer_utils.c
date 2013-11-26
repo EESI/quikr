@@ -100,6 +100,8 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 		char *start = strchr(line, '\n');	
 		if(start == NULL) 
 			continue;
+		
+		start = start + 1;
 
 		size_t start_len = strlen(start);
 
@@ -132,11 +134,12 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 
 			// for each char in the k-mer check if it is an error char
 			for(i = position + kmer - 1; i >= position; i--){
-				if(str[i] >> 2) { 
+				if(str[i] == 5) { 
 					mer = width;
 					position = i;
 					goto next;
 				}
+				// if it's a newline, we should skip it
 
 				// multiply this char in the mer by the multiply
 				// and bitshift the multiply for the next round

@@ -110,6 +110,11 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
+	if(rare_percent <= 0 || rare_percent > 1.0) {
+    fprintf(stderr, "Error: rare percent must be between 0 and 1\n");
+    exit(EXIT_FAILURE);
+	}
+
   if(verbose) {
     printf("rare width:%ld\n", rare_width);
     printf("kmer: %u\n", kmer);

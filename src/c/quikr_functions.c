@@ -61,24 +61,6 @@ void normalize_matrix(double *matrix, unsigned long long height, unsigned long l
   }
 }
 
-double *setup_count_matrix(char *filename, unsigned long long kmer, unsigned long long lambda, unsigned long long width) { 
-
-	unsigned long long x = 0;
-	unsigned long long *integer_counts = get_kmer_counts_from_file(filename, kmer);
-	double *count_matrix = malloc(width * sizeof(double));
-	check_malloc(count_matrix, NULL);
-
-	count_matrix[0] = 0; 
-
-	for(x = 1; x < width; x++) {
-		count_matrix[x] = (double)integer_counts[x-1];
-	}
-
-	free(integer_counts);
-
-	return count_matrix;
-}
-
 unsigned long long count_sequences(const char *filename) { 
   char *line = NULL;
   size_t len = 0;

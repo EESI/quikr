@@ -22,6 +22,70 @@
 #define solutions(i,j) (solutions[sequences*i+ j])
 #define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
+char **get_fasta_files(char *directory) {
+
+  DIR *dh;
+  struct dirent *e;
+	char **headers;
+	long long count = -2; // -2 for ../ and ./
+	long long i = 0;
+
+
+	// open our directory
+  dh = opendir(directory);
+  if(dh == NULL) {
+    fprintf(stderr, "could not open %s\n", directory);
+    exit(EXIT_FAILURE);
+  } 
+
+	while(e = readdir(dh)) 
+		count++; 
+	
+	e = NULL;
+	rewinddir(dh);
+
+	if(count == 0) {
+		fprintf(stderr, "%s is empty\n", directory);
+		exit(EXIT_FAILURE);
+	}
+
+	headers = malloc(count * sizeof(char *));
+	check_malloc(headers, NULL);
+
+
+	int array_pos = 0;
+	for(i = 0; i < count; i++) {
+		char *ext = NULL;
+		e = readdir(dh);
+			
+		if(strcmp(e->d_name, "..") == 0 || strcmp(e->d_name, ".") == 0) {
+			i--;
+			continue;
+		}
+
+		ext = strrchr(e->d_name, '.');
+
+		if(str_eq(ext, ".fasta") || 
+			 str_eq(ext, ".fa") ||
+			 str_eq(ext, ".fna"))
+		{
+			char *header = malloc(strlen(e->d_name) + 1);
+			check_malloc(header, NULL);
+			strcpy(header, e->d_name);
+			headers[array_pos] = header;
+		}
+		else {
+			continue;
+		}
+
+		array_pos++;
+	}
+
+	headers[array_pos] = NULL;
+
+	closedir(dh);
+	return headers;
+}
 int main(int argc, char **argv) {
 
   int c;
@@ -30,18 +94,20 @@ int main(int argc, char **argv) {
   char *sensing_matrix_filename = NULL;
   char *output_filename = NULL;
 
-  unsigned long long x = 0;
-  unsigned long long y = 0;
-
- 	long long i = 0;
+ 	unsigned long long i = 0;
+ 	unsigned long long j = 0;
 
   unsigned long long width = 0;
 
   unsigned int kmer = 6;
   unsigned long long lambda = 10000;
 
+  double rare_percent = 1.0;
 
   unsigned int jobs = 1;
+	long done = 0;
+
+	unsigned long long dir_count = 0;
 
   #ifdef Linux
   jobs = get_nprocs();
@@ -52,9 +118,6 @@ int main(int argc, char **argv) {
 
   int verbose = 0;
 
-  DIR *input_directory_dh;
-  struct dirent *entry;
-
   while (1) {
     static struct option long_options[] = {
       {"input-directory", required_argument, 0, 'i'},
@@ -63,6 +126,7 @@ int main(int argc, char **argv) {
       {"jobs",  required_argument, 0, 'j'},
       {"output", required_argument, 0, 'o'},
       {"sensing-matrix", required_argument, 0, 's'},
+      {"rare-percent", required_argument, 0, 'r'},
       {"verbose", no_argument, 0, 'v'},
       {"help", no_argument, 0, 'h'},
       {"version", no_argument, 0, 'V'},
@@ -70,29 +134,32 @@ int main(int argc, char **argv) {
     };
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "k:l:s:i:o:j:hvV", long_options, &option_index);
+    c = getopt_long (argc, argv, "k:l:s:i:o:j:r:hvV", long_options, &option_index);
 
     if (c == -1)
       break;
 
     switch (c) {
+      case 'i':
+        input_fasta_directory = optarg;
+        break;
+      case 'j':
+        jobs = atoi(optarg);
+        break;
       case 'k':
         kmer = atoi(optarg);
         break;
       case 'l':
         lambda = atoi(optarg);
         break;
-      case 's':
-        sensing_matrix_filename = optarg;
-        break;
-      case 'j':
-        jobs = atoi(optarg);
-        break;
-      case 'i':
-        input_fasta_directory = optarg;
-        break;
       case 'o':
         output_filename = optarg;
+        break;
+      case 'r':
+        rare_percent = atof(optarg);
+        break;
+      case 's':
+        sensing_matrix_filename = optarg;
         break;
       case 'v':
         verbose = 1;
@@ -126,6 +193,10 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
+	if(rare_percent <= 0 || rare_percent > 1.0) {
+    fprintf(stderr, "Error: rare percent must be between 0 and 1\n");
+    exit(EXIT_FAILURE);
+	}
   if(verbose) { 
     printf("kmer: %u\n", kmer);
     printf("lambda: %llu\n", lambda);
@@ -135,180 +206,190 @@ int main(int argc, char **argv) {
     printf("number of jobs to run at once: %d\n", jobs); 
   }
 
-
   if(access (sensing_matrix_filename, F_OK) == -1) {
     fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
     exit(EXIT_FAILURE);
   }
-
-  input_directory_dh = opendir(input_fasta_directory);
-  if(input_directory_dh == NULL) {
-    fprintf(stderr, "could not open %s\n", input_fasta_directory);
-    exit(EXIT_FAILURE);
-  } 
 
 	if(kmer == 0) {
     fprintf(stderr, "Error: zero is not a valid kmer\n");
     exit(EXIT_FAILURE);
 	}
 
-  // do a directory count
-  long dir_count = -2; // -2 for ../ and ./
-  while(entry = readdir(input_directory_dh)) 
-    dir_count++; 
-  rewinddir(input_directory_dh);
-  if(dir_count == 0) {
-    fprintf(stderr, "%s is empty\n", input_fasta_directory);
-    exit(EXIT_FAILURE);
-  }
+	char **filenames = get_fasta_files(input_fasta_directory);
+	while(filenames[dir_count] != NULL)
+		dir_count++;
+
 
   // 4 "ACGT" ^ Kmer gives us the size of output rows
   width = pow(4, kmer) + 1;
 
-  struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename);
+  struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
+	double *sensing_matrix_ptr = sensing_matrix->matrix;
+	unsigned long long sequences = sensing_matrix->matrix;
 
   if(verbose) {
-    printf("directory count: %ld\n", dir_count);
+    printf("directory count: %llu\n", dir_count);
     printf("width: %llu\nsequences %llu\n", width, sensing_matrix->sequences);
-  }
+	}
 
-  // multiply our matrix by lambda
-  for(x = 1; x < sensing_matrix->sequences; x++) {
-    for(y = 0; y < width - 1; y++) {
-      sensing_matrix->matrix[width*x + y] = sensing_matrix->matrix[width*x + y] * lambda;
-    }
-  }
+  unsigned long long *solutions = malloc(dir_count * sequences * sizeof(unsigned long long));
+	check_malloc(solutions, NULL);
 
-  // set the first row to be all 1's
-  for(x = 0; x < sensing_matrix->sequences; x++) {
-    sensing_matrix->matrix[width * x] = 1.0;
-  }
+  long long *file_sequence_count = calloc(dir_count, sizeof(long long));
+	check_malloc(file_sequence_count, NULL);
 
-  double *solutions = malloc(dir_count * sensing_matrix->sequences * sizeof(double));
-  if(solutions == NULL) {
-    fprintf(stderr, "Could not allocate enough memory for solutions vector\n");
-    exit(EXIT_FAILURE);
-  }
-
-  char **filenames = malloc(dir_count * sizeof(char *));
-  if(filenames == NULL) {
-    fprintf(stderr, "Could not allocate enough memory\n");
-    exit(EXIT_FAILURE);
-  }
-
-  long *file_sequence_count = calloc(dir_count, sizeof(long));
-  if(file_sequence_count == NULL) {
-    fprintf(stderr, "Could not allocate enough memory\n");
-    exit(EXIT_FAILURE);
-  }
-
+	#ifdef OMP
   omp_set_num_threads(jobs);
-  long done = 0;
+	#endif
   printf("Beginning to process samples\n"); 
-  #pragma omp parallel for shared(solutions, sensing_matrix, width, done)
+  #pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
   for(long i = 0; i < dir_count; i++ ) {
 
-    unsigned long long z = 0;
-    struct dirent *directory_entry;
-    char *filename = malloc(256 * sizeof(char));
-    char *base_filename = malloc(256 * sizeof(char));
-    if(filename == NULL || base_filename == NULL) {
-      fprintf(stderr, "Could not allocate enough memory\n");
-      exit(EXIT_FAILURE);
-    }
+		unsigned long long x = 0;
+		unsigned long long y = 0;
+		unsigned long long z = 0;
 
-    #pragma omp critical
-    {
-      directory_entry = readdir(input_directory_dh);
-      strcpy(base_filename, directory_entry->d_name);
-    }
+		unsigned long long file_sequence_count = 0;
+  	unsigned long long rare_value = 0;
+  	unsigned long long rare_width = 0; 
 
-    if(strcmp(base_filename, "..") == 0 || strcmp(base_filename, ".") == 0) {
-      i--;
-      continue;
-    }
+  	double percentage = 1.0;
+		double rare_percent = 1.0;
+		
+		char *full_filename = malloc(strlen(input_fasta_directory) + strlen(filenames[i]) + 2);
+		check_malloc(full_filename, NULL);
 
-    // get our base filenames
-    filenames[i] = base_filename; 
+		sprintf(full_filename, "%s/%s", input_fasta_directory, filenames[i]); 
+		printf("%s\n", full_filename);
+		file_sequence_count = count_sequences(full_filename);
 
-    // get our real filename
-    sprintf(filename, "%s/%s", input_fasta_directory, directory_entry->d_name);
+		// load counts matrix
+		double *count_matrix = malloc(width * sizeof(double));
+		check_malloc(count_matrix, NULL);
 
-    // get individual sequence count
-    file_sequence_count[i] =  count_sequences(filename);
+		{
+			unsigned long long *integer_counts = get_kmer_counts_from_file(full_filename, kmer);
 
-    // get our count matrix
-		double *count_matrix = setup_count_matrix(filename, kmer, lambda, width); 
+			for(x = 0; x < width; x++)
+				count_matrix[x] = (double)integer_counts[x];
 
-    double *sensing_matrix_copy = malloc(sizeof(double) * sensing_matrix->sequences * width);
-    if(sensing_matrix_copy == NULL) {
-      fprintf(stderr, "Could not allocate enough memory\n");
-      exit(EXIT_FAILURE);
-    }
+			free(integer_counts);
+		}
 
-    memcpy(sensing_matrix_copy, sensing_matrix->matrix, sensing_matrix->sequences * width * sizeof(double));
+		// get our "rare" counts
+		while(1) {
+			rare_width = 0;
+			for(x = 0; x < width; x++) {
+				if(count_matrix[x] < rare_value) {
+					rare_width++;
+				}
+			}
+			percentage = (float)rare_width / (float)width;
 
+			if(percentage >= rare_percent)
+				break;
 
-    // run nnls
-    double *solution = nnls(sensing_matrix_copy, count_matrix, sensing_matrix->sequences, width);
+			rare_value++;
+		}
 
-    // normalize our solution
-    normalize_matrix(solution, 1, sensing_matrix->sequences);
+		if(verbose)
+			printf("there are %llu values less than %llu\n", rare_width, rare_value);
 
-    // add the current solution to the solutions array
-    for(z = 0; z < sensing_matrix->sequences; z++ )  {
-      solutions[i*sensing_matrix->sequences + z] = solution[z]; 
-    }
+		// add a extra space for our zero's array
+		rare_width++;
 
-    done++;
-    printf("%ld/%ld samples processed\n", done, dir_count); 
-    free(solution);
-    free(count_matrix);
-    free(filename);
-    free(sensing_matrix_copy);
-  }
+		// store our count matrix
+		double *count_matrix_rare = calloc(rare_width, sizeof(double));
+		check_malloc(count_matrix_rare, NULL);
 
-  // output our matrix
-  FILE *output_fh = fopen(output_filename, "w");
-  if(output_fh == NULL) { 
-    fprintf(stderr, "Could not open %s for writing\n", output_filename);
-    exit(EXIT_FAILURE);
-  }
+		double *sensing_matrix_rare = malloc((rare_width) * sequences * sizeof(double));
+		check_malloc(sensing_matrix_rare, NULL);
 
-  fprintf(output_fh, "# QIIME vQuikr OTU table\n");
-  fprintf(output_fh, "#OTU_ID\t");
+		// copy only kmers from our original counts that match our rareness percentage
+		// in both our count matrix and our sensing matrix
+		for(x = 0, y = 1;  x < width; x++) {
+			if(count_matrix[x] < rare_value) {
+				count_matrix_rare[y] = count_matrix[x];
 
-  // print our filename headers
-  for(i = 0; i < dir_count - 1; i++) {
-    fprintf(output_fh, "%s\t", filenames[i]);
-  }
-  fprintf(output_fh, "%s\n", filenames[dir_count - 1]);
+				for(z = 0; z < sequences; z++) 
+					sensing_matrix_rare[z*rare_width + y] = sensing_matrix_ptr[z*width + x];
 
-  // get our actual values 
-  for(y = 0; y < sensing_matrix->sequences; y++) {
-    for(i = 0; i < dir_count; i++) {
-      solutions[sensing_matrix->sequences*i + y] = round(solutions[sensing_matrix->sequences*i + y] * file_sequence_count[i]);
-    }
-  }
+				y++;
+			}
+		}
 
-  for(y = 0; y < sensing_matrix->sequences; y++) {
+		// normalize our kmer counts and our sensing_matrix
+		normalize_matrix(count_matrix_rare, 1, rare_width);
+		normalize_matrix(sensing_matrix_rare, sequences, rare_width);
 
-    double column_sum = 0.;
-    for(i = 0; i < dir_count; i++) {
-      column_sum += solutions[sensing_matrix->sequences*i + y];
-    }
+		// multiply our kmer counts and sensing matrix by lambda
+		for(x = 1; x < rare_width; x++) 
+			count_matrix_rare[x] *= lambda;
 
-    // if our column is zero, don't bother printing the row
-    if(column_sum != 0) {
-      fprintf(output_fh, "%s\t", sensing_matrix->headers[y]);
+		for(x = 0; x < sequences; x++) {
+			for(y = 1; y < rare_width; y++) {
+				sensing_matrix_rare[rare_width*x + y] *= lambda;
+			}
+		}
 
-      for(i = 0; i < dir_count - 1; i++) {
-				fprintf(output_fh, "%d\t", (int)solutions[sensing_matrix->sequences*i + y]);
-      }
-      fprintf(output_fh, "%d\n", (int)solutions[sensing_matrix->sequences*(dir_count - 1) + y]);
-    }
-  }
-  fclose(output_fh);
+		// count_matrix's first element should be zero
+		count_matrix_rare[0] = 0;
+		// stack one's on our first row of our sensing matrix
+		for(x = 0; x < sequences; x++) {
+			sensing_matrix_rare[x*rare_width] = 1.0;
+		}
 
-  return EXIT_SUCCESS;
+		double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sequences, rare_width);
+
+		// add the current solution to the solutions array
+		for(int z = 0; z < sequences; z++ )  {
+			solutions[sensing_matrix->sequences*i + z] = (unsigned long long)round(solution[z] * file_sequence_count);
+		}
+
+		done++;
+		printf("%ld/%ld samples processed\n", done, dir_count); 
+		free(solution);
+		free(full_filename);
+		free(count_matrix_rare);
+		free(count_matrix);
+		free(sensing_matrix_rare);
+	}
+
+	// output our matrix
+	FILE *output_fh = fopen(output_filename, "w");
+	if(output_fh == NULL) { 
+		fprintf(stderr, "Could not open %s for writing\n", output_filename);
+		exit(EXIT_FAILURE);
+	}
+
+	fprintf(output_fh, "# QIIME vQuikr OTU table\n");
+	fprintf(output_fh, "#OTU_ID\t");
+
+	// print our filename headers
+	for(i = 0; i < dir_count - 1; i++) {
+		fprintf(output_fh, "%s\t", filenames[i]);
+	}
+	fprintf(output_fh, "%s\n", filenames[dir_count - 1]);
+
+	for(j = 0; j < sequences; j++) {
+
+		double column_sum = 0.;
+		for(i = 0; i < dir_count; i++) {
+			column_sum += solutions[sensing_matrix->sequences*i + j];
+		}
+
+		// if our column is zero, don't bother printing the row
+		if(column_sum != 0) {
+			fprintf(output_fh, "%s\t", sensing_matrix->headers[j]);
+
+			for(i = 0; i < dir_count - 1; i++) {
+				fprintf(output_fh, "%llu\t", solutions[sensing_matrix->sequences*i + j]);
+			}
+			fprintf(output_fh, "%llu\n", solutions[sensing_matrix->sequences*(dir_count - 1) + j]);
+		}
+	}
+	fclose(output_fh);
+
+	return EXIT_SUCCESS;
 }
