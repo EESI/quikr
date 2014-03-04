@@ -28,7 +28,7 @@ unsigned long num_to_index(const char *str, const int kmer, const long error_pos
 
   for(i = kmer - 1; i >= 0; i--){
 
-		if(str[i] >> 2) { 
+		if(str[i] == 5) { 
 			// position += i;
 			return error_pos;
 		}
@@ -117,7 +117,7 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 
 		// strip out all other newlines to handle multiline sequences
 		str = strnstrip(start, str, '\n',start_len);
-		size_t seq_length = strlen(str);
+		ssize_t seq_length = strlen(str);
 		if(seq_length < kmer)
 			continue;
 

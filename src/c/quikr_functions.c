@@ -21,7 +21,6 @@ void check_malloc(void *ptr, char *error) {
 	}
 }
 
-
 void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {
 	FILE *count_fh = fopen("count.mat", "w");
 	FILE *sensing_fh = fopen("sensing.mat", "w");

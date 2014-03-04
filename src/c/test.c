@@ -60,7 +60,6 @@ void test_normalize_matrix() {
 	int test_number = 1;
 	int fail_flag = 0;
 	char *test_name = "test_normailze_matrix";
-	char *type = "%lf";
 
 	double sum = 0;
 	int i = 0;
@@ -106,8 +105,7 @@ void test_normalize_matrix() {
 		
 }
 
-int main(int argc, char **argv) {
-	int test_number = 1;
+int main() {
 
 	header("count_sequences");
 	test_count_sequences();

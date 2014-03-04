@@ -38,7 +38,7 @@ char **get_fasta_files(char *directory) {
     exit(EXIT_FAILURE);
   } 
 
-	while(e = readdir(dh)) 
+	while((e = readdir(dh))) 
 		count++; 
 	
 	e = NULL;
@@ -226,11 +226,11 @@ int main(int argc, char **argv) {
 
   struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
 	double *sensing_matrix_ptr = sensing_matrix->matrix;
-	unsigned long long sequences = sensing_matrix->matrix;
+	unsigned long long sequences = sensing_matrix->sequences;
 
   if(verbose) {
     printf("directory count: %llu\n", dir_count);
-    printf("width: %llu\nsequences %llu\n", width, sensing_matrix->sequences);
+    printf("width: %llu\nsequences %llu\n", width, sequences);
 	}
 
   unsigned long long *solutions = malloc(dir_count * sequences * sizeof(unsigned long long));
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
 	#endif
   printf("Beginning to process samples\n"); 
   #pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
-  for(long i = 0; i < dir_count; i++ ) {
+  for(size_t i = 0; i < dir_count; i++ ) {
 
 		unsigned long long x = 0;
 		unsigned long long y = 0;
@@ -343,7 +343,7 @@ int main(int argc, char **argv) {
 		double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sequences, rare_width);
 
 		// add the current solution to the solutions array
-		for(int z = 0; z < sequences; z++ )  {
+		for(unsigned long long z = 0; z < sequences; z++ )  {
 			solutions[sensing_matrix->sequences*i + z] = (unsigned long long)round(solution[z] * file_sequence_count);
 		}
 

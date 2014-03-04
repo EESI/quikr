@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 	}
 
   if(verbose) {
-    printf("rare width:%ld\n", rare_width);
+    printf("rare width:%llu\n", rare_width);
     printf("kmer: %u\n", kmer);
     printf("lambda: %llu\n", lambda);
     printf("fasta: %s\n", input_fasta_filename);
