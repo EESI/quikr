@@ -32,7 +32,8 @@ Our Quikr code is available on our sourceforge download page:
 
 [sourceforge project page](http://sourceforge.net/projects/quikr/)
 
-Alternatively you can clone the latest version from Github.
+Alternatively you can clone the latest version from Github, or 
+download older versions using github's 'release' view.
 
 To install quikr, download our project and in the folder run:
 
