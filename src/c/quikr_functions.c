@@ -93,7 +93,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 
 	double *matrix = NULL;
 
-	int kmer = 0;
+	unsigned int kmer = 0;
 	
 	unsigned long long i = 0;	
 	unsigned long long *row = NULL;
@@ -142,6 +142,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 		fprintf(stderr, "Error parsing sensing matrix, kmer is zero\n");
 		exit(EXIT_FAILURE);
 	}
+
 	if(kmer != target_kmer) {
 		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
 		exit(EXIT_FAILURE);

@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
 		}
 
 		done++;
-		printf("%ld/%ld samples processed\n", done, dir_count); 
+		printf("%ld/%llu samples processed\n", done, dir_count); 
 		free(solution);
 		free(full_filename);
 		free(count_matrix_rare);
