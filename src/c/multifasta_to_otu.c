@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 
 
   // 4 "ACGT" ^ Kmer gives us the size of output rows
-  width = pow(4, kmer) + 1;
+  width = pow(4, kmer);
 
   struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
 	double *sensing_matrix_ptr = sensing_matrix->matrix;
@@ -234,7 +234,8 @@ int main(int argc, char **argv) {
 
   if(verbose) {
     printf("directory count: %llu\n", dir_count);
-    printf("width: %llu\nsequences %llu\n", width, sequences);
+    printf("width: %llu\n", width);
+		printf("sequences: %llu\n", sequences);
 	}
 
   unsigned long long *solutions = malloc(dir_count * sequences * sizeof(unsigned long long));
