@@ -22,6 +22,10 @@
 #define solutions(i,j) (solutions[sequences*i+ j])
 #define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
+static int cmp (const void * a, const void * b) {
+   return ( *(double*)a - *(double*)b );
+	 }
+
 char **get_fasta_files(char *directory) {
 
   DIR *dh;
@@ -246,52 +250,61 @@ int main(int argc, char **argv) {
   #pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
   for(size_t i = 0; i < dir_count; i++ ) {
 
-		unsigned long long x = 0;
-		unsigned long long y = 0;
-		unsigned long long z = 0;
+		size_t x = 0;
+		size_t y = 0;
+		size_t z = 0;
 
 		unsigned long long file_sequence_count = 0;
   	unsigned long long rare_value = 0;
   	unsigned long long rare_width = 0; 
 
-  	double percentage = 1.0;
 		double rare_percent = 1.0;
 		
 		char *full_filename = malloc(strlen(input_fasta_directory) + strlen(filenames[i]) + 2);
 		check_malloc(full_filename, NULL);
 
 		sprintf(full_filename, "%s/%s", input_fasta_directory, filenames[i]); 
-		printf("%s\n", full_filename);
+		printf("processing %s\n", full_filename);
 		file_sequence_count = count_sequences(full_filename);
 
 		// load counts matrix
 		double *count_matrix = malloc(width * sizeof(double));
 		check_malloc(count_matrix, NULL);
+		double *sorted_count_matrix = malloc(width * sizeof(double));
+		check_malloc(sorted_count_matrix, NULL);
 
+		// convert our matrix into  doubles
 		{
 			unsigned long long *integer_counts = get_kmer_counts_from_file(full_filename, kmer);
 
-			for(x = 0; x < width; x++)
-				count_matrix[x] = (double)integer_counts[x];
+			for(x = 0; x < width; x++) {
+				sorted_count_matrix[x] = count_matrix[x] = (double)integer_counts[x];
+			}
 
 			free(integer_counts);
 		}
 
+		// sort our array
+		qsort(sorted_count_matrix, width, sizeof(double), cmp);
+
 		// get our "rare" counts
-		while(1) {
+		for(y = 0; y < width; y++) {
+			double percentage = 0;
+
+			rare_value = sorted_count_matrix[y];
 			rare_width = 0;
 			for(x = 0; x < width; x++) {
-				if(count_matrix[x] < rare_value) {
+				if(count_matrix[x] <= rare_value) {
 					rare_width++;
 				}
 			}
-			percentage = (float)rare_width / (float)width;
+			percentage = (double)rare_width / (double)width;
 
 			if(percentage >= rare_percent)
 				break;
-
-			rare_value++;
 		}
+		
+		free(sorted_count_matrix);
 
 		if(verbose)
 			printf("there are %llu values less than %llu\n", rare_width, rare_value);
