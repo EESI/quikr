@@ -469,9 +469,9 @@ int main(int argc, char **argv) {
 
 	// print our filename headers
 	for(i = 0; i < dir_count - 1; i++) {
-		fprintf(output_fh, "%s\t", filenames[i]);
+		fprintf(output_fh, "%s\t", basename(filenames[i]));
 	}
-	fprintf(output_fh, "%s\n", filenames[dir_count - 1]);
+	fprintf(output_fh, "%s\n", basename(filenames[dir_count - 1]));
 
 	for(j = 0; j < sequences; j++) {
 
