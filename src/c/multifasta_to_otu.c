@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <errno.h>
 #include <getopt.h>
 #include <math.h>
