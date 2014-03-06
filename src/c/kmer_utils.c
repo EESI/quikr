@@ -59,6 +59,7 @@ char *strnstrip(const char *s, char *dest, int c, unsigned long long len) {
 	return dest;
 }
 
+
 unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned int kmer) {
 	
   char *line = NULL;
