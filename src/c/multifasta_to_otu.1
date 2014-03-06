@@ -5,6 +5,8 @@ multifasta_to_otu \- create a QIIME OTU table based on Quikr results.
 .B multifasta_to_otu
 .RB [ \-i
 .IR input-directory ]
+.RB [ \-f
+.IR input-filelist ]
 .RB [ \-s
 .IR sensing-matrix]
 .RB [ \-k
@@ -28,6 +30,9 @@ number of times a specimen was seen in all of the samples.
 .TP
 .B \-i, --input-directory
 the directory containing the samples' fasta files of reads (note each fasta file should correspond to a separate sample)
+.TP
+.B \-f, --input-filelist
+a file containing list of fasta files to process seperated by newline (same rules apply as input-directory)
 .TP
 .B \-s, --sensing-matrix
 location of the sensing matrix.
