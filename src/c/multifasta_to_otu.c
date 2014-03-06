@@ -327,29 +327,29 @@ int main(int argc, char **argv) {
 		printf("sequences: %llu\n", sequences);
 	}
 
-  unsigned long long *solutions = malloc(dir_count * sequences * sizeof(unsigned long long));
+	unsigned long long *solutions = malloc(dir_count * sequences * sizeof(unsigned long long));
 	check_malloc(solutions, NULL);
 
-  long long *file_sequence_count = calloc(dir_count, sizeof(long long));
+	long long *file_sequence_count = calloc(dir_count, sizeof(long long));
 	check_malloc(file_sequence_count, NULL);
 
 	#ifdef OMP
-  	omp_set_num_threads(jobs);
+		omp_set_num_threads(jobs);
 	#endif
 
 
-  printf("Beginning to process samples\n"); 
+		printf("Beginning to process samples\n"); 
 
   #pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
-  for(size_t i = 0; i < dir_count; i++ ) {
+	for(size_t i = 0; i < dir_count; i++ ) {
 
 		size_t x = 0;
 		size_t y = 0;
 		size_t z = 0;
 
 		unsigned long long file_sequence_count = 0;
-  	unsigned long long rare_value = 0;
-  	unsigned long long rare_width = 0; 
+		unsigned long long rare_value = 0;
+		unsigned long long rare_width = 0; 
 
 		double rare_percent = 1.0;
 		

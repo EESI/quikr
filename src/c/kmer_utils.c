@@ -22,22 +22,22 @@ const unsigned char alpha[256] =
 // base-10 index
 unsigned long num_to_index(const char *str, const int kmer, const long error_pos) {
 
-  int i = 0;
-  unsigned long out = 0;
-  unsigned long multiply = 1;
+	int i = 0;
+	unsigned long out = 0;
+	unsigned long multiply = 1;
 
-  for(i = kmer - 1; i >= 0; i--){
+	for(i = kmer - 1; i >= 0; i--){
 
 		if(str[i] == 5) { 
 			// position += i;
 			return error_pos;
 		}
 
-    out += str[i] * multiply;
-    multiply = multiply << 2;
-  }
+		out += str[i] * multiply;
+		multiply = multiply << 2;
+	}
 
-  return out;
+	return out;
 }
 
 // Strip out any character 'c' from char array 's' into a destination dest (you
@@ -61,30 +61,30 @@ char *strnstrip(const char *s, char *dest, int c, unsigned long long len) {
 
 
 unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned int kmer) {
-	
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
 
-  long long i = 0;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	long long i = 0;
 	long long position = 0;
 
-  FILE * const fh = fopen(fn, "r");
-  if(fh == NULL) {
-    fprintf(stderr, "Error opening %s - %s\n", fn, strerror(errno));
-    exit(EXIT_FAILURE);
-  }
+	FILE * const fh = fopen(fn, "r");
+	if(fh == NULL) {
+		fprintf(stderr, "Error opening %s - %s\n", fn, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	// width is 4^kmer  
 	// there's a sneaky bitshift to avoid pow dependency
 	const unsigned long width = pow_four(kmer); 
 
 	// malloc our return array
-  unsigned long long * counts = malloc((width+ 1) * sizeof(unsigned long long));
+	unsigned long long * counts = malloc((width+ 1) * sizeof(unsigned long long));
 	memset(counts, 0, width * sizeof(unsigned long long));
-  if(counts == NULL)  {
+	if(counts == NULL)  {
 		fprintf(stderr, strerror(errno));
-    exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	char *str = malloc(4096);
