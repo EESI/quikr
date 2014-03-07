@@ -15,9 +15,9 @@ if nargin>1
   error('too many input arguments');
 end
 
-[status, counts]=unix(['count-kmers -r 6 -1 -u ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
+[status, counts]=unix(['kmer_total_count -k 6 -i ' inputfasta]); %count the 6-mers in the fasta file, in the forward direction, return the counts without labels
 if status ~= 0
-  error('count-kmers failed: ensure count-kmers is in your path.');
+  error('kmer_total_count failed: ensure kmer_total_count is in your path.');
 end
 
 counts=textscan(counts,'%f'); %convert into floats
