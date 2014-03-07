@@ -1,7 +1,7 @@
 PREFIX = "/usr/"
-all: nbc c
+all: c
 
-install: nbc c 
+install: c 
 	@echo installing executable files to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -vf src/nbc/probabilities-by-read ${DESTDIR}${PREFIX}/bin/probabilities-by-read
@@ -19,10 +19,6 @@ install: nbc c
 	@cp -vf src/c/quikr.1 ${DESTDIR}${PREFIX}/share/man/man1/quikr.1
 	@cp -vf src/c/quikr_train.1 ${DESTDIR}${PREFIX}/share/man/man1/quikr_train.1
 	@cp -vf src/c/multifasta_to_otu.1 ${DESTDIR}${PREFIX}/share/man/man1/multifasta_to_otu.1
-	
-nbc:
-	@echo "building nbc"
-	@cd src/nbc; make
 
 c:
 	@echo "building c"
