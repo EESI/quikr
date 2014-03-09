@@ -50,10 +50,7 @@ char **get_fasta_files_from_file(char *fn) {
 			exit(EXIT_FAILURE);
 		}
 		strncpy(file, line, strlen(line) + 1 );
-		printf("%zu\n", strlen(line));
-		printf("%zu\n", strlen(file));
 		file[strlen(file)- 1] = '\0';
-		printf(">%s< %zu >%s< %zu\n", line, strlen(line), file, strlen(file));
 	
 		if(access(file, F_OK) == 0) {
 
