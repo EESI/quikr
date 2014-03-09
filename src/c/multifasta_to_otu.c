@@ -403,13 +403,13 @@ int main(int argc, char **argv) {
 		double *count_matrix_rare = calloc(rare_width, sizeof(double));
 		check_malloc(count_matrix_rare, NULL);
 
-		double *sensing_matrix_rare = malloc((rare_width) * sequences * sizeof(double));
+		double *sensing_matrix_rare = calloc(rare_width * sequences, sizeof(double));
 		check_malloc(sensing_matrix_rare, NULL);
 
 		// copy only kmers from our original counts that match our rareness percentage
 		// in both our count matrix and our sensing matrix
 		for(x = 0, y = 1;  x < width; x++) {
-			if(count_matrix[x] < rare_value) {
+			if(count_matrix[x] <= rare_value) {
 				count_matrix_rare[y] = count_matrix[x];
 
 				for(z = 0; z < sequences; z++) 
@@ -438,6 +438,13 @@ int main(int argc, char **argv) {
 		// stack one's on our first row of our sensing matrix
 		for(x = 0; x < sequences; x++) {
 			sensing_matrix_rare[x*rare_width] = 1.0;
+		}
+
+		size_t zz;
+		for(y = 0; y < sequences; y++) {
+			for(zz = 0; zz < rare_width - 1; zz++)
+				printf("%lf\t", sensing_matrix_rare[rare_width * y + zz]);
+			printf("%lf\n", sensing_matrix_rare[rare_width * y + rare_width - 1]);
 		}
 
 		double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sequences, rare_width);
