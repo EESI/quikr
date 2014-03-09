@@ -36,11 +36,11 @@ char **get_fasta_files_from_file(char *fn) {
 	size_t len = 0;
 	char *line = NULL;
 
-  FILE *fh = fopen(fn, "r");
-  if(fh == NULL) {
-    fprintf(stderr, "Error opening %s - %s\n", fn, strerror(errno));
-    exit(EXIT_FAILURE);
-  }
+	FILE *fh = fopen(fn, "r");
+	if(fh == NULL) {
+		fprintf(stderr, "Error opening %s - %s\n", fn, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	files = malloc(sizeof(char **));
 
@@ -62,9 +62,9 @@ char **get_fasta_files_from_file(char *fn) {
 				fprintf(stderr, "could not realloc keys\n");
 				exit(EXIT_FAILURE);
 			}
-		} 
+		}
 		else {
-			fprintf(stderr, "Warning: ignoring %s (%s)\n", file, strerror(errno)); 
+			fprintf(stderr, "Warning: ignoring %s (%s)\n", file, strerror(errno));
 			errno = 0;
 			free(file);
 		}
@@ -98,7 +98,7 @@ char **get_fasta_files_from_directory(char *directory) {
 		exit(EXIT_FAILURE);
 	}
 
-	while((e = readdir(dh))) 
+	while((e = readdir(dh)))
 		count++;
 
 	e = NULL;
@@ -125,14 +125,14 @@ char **get_fasta_files_from_directory(char *directory) {
 
 		ext = strrchr(e->d_name, '.');
 
-		if(str_eq(ext, ".fasta") || 
+		if(str_eq(ext, ".fasta") ||
 				str_eq(ext, ".fa") ||
 				str_eq(ext, ".fna"))
 		{
 
 			char *header = malloc(strlen(directory) + strlen(e->d_name) + 1);
 			check_malloc(header, NULL);
-			sprintf(header, "%s/%s", directory, e->d_name); 
+			sprintf(header, "%s/%s", directory, e->d_name);
 			headers[array_pos] = header;
 		}
 		else {
@@ -277,14 +277,14 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	if(verbose) { 
+	if(verbose) {
 		printf("kmer: %u\n", kmer);
 		printf("lambda: %llu\n", lambda);
 		printf("input directory: %s\n", input_fasta_directory);
 		printf("input filelist: %s\n", input_fasta_filelist);
 		printf("sensing database: %s\n", sensing_matrix_filename);
 		printf("output: %s\n", output_filename);
-		printf("number of jobs to run at once: %d\n", jobs); 
+		printf("number of jobs to run at once: %d\n", jobs);
 	}
 
 	if(access (sensing_matrix_filename, F_OK) == -1) {
@@ -336,9 +336,9 @@ int main(int argc, char **argv) {
 	#endif
 
 
-		printf("Beginning to process samples\n"); 
+		printf("Beginning to process samples\n");
 
-  #pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
+	#pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
 	for(size_t i = 0; i < dir_count; i++ ) {
 
 		size_t x = 0;
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 
 		unsigned long long file_sequence_count = 0;
 		unsigned long long rare_value = 0;
-		unsigned long long rare_width = 0; 
+		unsigned long long rare_width = 0;
 
 		double rare_percent = 1.0;
 		
@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
 		if(verbose)
 			printf("there are %llu values less than %llu\n", rare_width, rare_value);
 
-		// add a extra space for our zero's array
+		// add a extra space for our zero's array, so we can set the first column to 1's
 		rare_width++;
 
 		// store our count matrix
@@ -408,11 +408,13 @@ int main(int argc, char **argv) {
 
 		// copy only kmers from our original counts that match our rareness percentage
 		// in both our count matrix and our sensing matrix
-		for(x = 0, y = 1;  x < width; x++) {
+		//
+		// y = 1 because we are offsetting the array by 1, so we can set the first row to all 1's
+		for(x = 0, y = 1;  x < width - 1; x++) {
 			if(count_matrix[x] <= rare_value) {
 				count_matrix_rare[y] = count_matrix[x];
 
-				for(z = 0; z < sequences; z++) 
+				for(z = 0; z < sequences; z++)
 					sensing_matrix_rare[z*rare_width + y] = sensing_matrix_ptr[z*width + x];
 
 				y++;
@@ -424,9 +426,10 @@ int main(int argc, char **argv) {
 		normalize_matrix(sensing_matrix_rare, sequences, rare_width);
 
 		// multiply our kmer counts and sensing matrix by lambda
-		for(x = 1; x < rare_width; x++) 
+		for(x = 1; x < rare_width; x++)
 			count_matrix_rare[x] *= lambda;
 
+		//TODO use one loop
 		for(x = 0; x < sequences; x++) {
 			for(y = 1; y < rare_width; y++) {
 				sensing_matrix_rare[rare_width*x + y] *= lambda;
@@ -455,7 +458,7 @@ int main(int argc, char **argv) {
 		}
 
 		done++;
-		printf("%ld/%llu samples processed\n", done, dir_count); 
+		printf("%ld/%llu samples processed\n", done, dir_count);
 		free(solution);
 		free(count_matrix_rare);
 		free(count_matrix);
@@ -464,7 +467,7 @@ int main(int argc, char **argv) {
 
 	// output our matrix
 	FILE *output_fh = fopen(output_filename, "w");
-	if(output_fh == NULL) { 
+	if(output_fh == NULL) {
 		fprintf(stderr, "Could not open %s for writing\n", output_filename);
 		exit(EXIT_FAILURE);
 	}
