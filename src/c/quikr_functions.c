@@ -13,10 +13,10 @@
 void check_malloc(void *ptr, char *error) {
 	if (ptr == NULL) {
 		if(error != NULL)  {
-			fprintf(stderr,"Error: %s\n", error); 
-		} 
+			fprintf(stderr,"Error: %s\n", error);
+		}
 		else { fprintf(stderr, "Error: Could not allocate enough memory - %s\n", strerror(errno));
-		} 
+		}
 		exit(EXIT_FAILURE);
 	}
 }
@@ -46,42 +46,42 @@ void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {
 
 
 void normalize_matrix(double *matrix, unsigned long long height, unsigned long long width) {
-  unsigned long long x = 0;
-  unsigned long long y = 0;
+	unsigned long long x = 0;
+	unsigned long long y = 0;
 
-  for(x = 0; x < height; x++) {
+	for(x = 0; x < height; x++) {
 
-    double row_sum = 0;
+		double row_sum = 0;
 
-    for(y = 0; y < (width); y++)
-      row_sum = row_sum + matrix[width * x + y];
-    for(y = 0; y < (width); y++) 
-      matrix[width * x + y] = matrix[width * x + y] / row_sum; 
-  }
+		for(y = 0; y < (width); y++)
+			row_sum = row_sum + matrix[width * x + y];
+		for(y = 0; y < (width); y++)
+			matrix[width * x + y] = matrix[width * x + y] / row_sum;
+	}
 }
 
-unsigned long long count_sequences(const char *filename) { 
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
+unsigned long long count_sequences(const char *filename) {
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
 
-  unsigned long long sequences = 0;
+	unsigned long long sequences = 0;
 
-  FILE *fh = fopen(filename, "r");
-  if(fh == NULL) {
-    fprintf(stderr, "could not open \"%s\"\n", filename );
+	FILE *fh = fopen(filename, "r");
+	if(fh == NULL) {
+		fprintf(stderr, "could not open \"%s\"\n", filename );
 		return 0;
-  }
+	}
 
-  while ((read = getline(&line, &len, fh)) != -1) {
-    if(line[0] == '>') 
-      sequences++;
-  }
+	while ((read = getline(&line, &len, fh)) != -1) {
+		if(line[0] == '>')
+			sequences++;
+	}
 
-  free(line);
-  fclose(fh);
+	free(line);
+	fclose(fh);
 
-  return sequences;
+	return sequences;
 }
 
 
@@ -94,20 +94,20 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 
 	unsigned int kmer = 0;
 	
-	unsigned long long i = 0;	
+	unsigned long long i = 0;
 	unsigned long long *row = NULL;
 	unsigned long long sequences = 0;
 	unsigned long long width = 0;
 
- 	struct matrix *ret = NULL;
+	struct matrix *ret = NULL;
 
-  gzFile fh = NULL;
+	gzFile fh = NULL;
 
-  fh = gzopen(filename, "r");
-  if(fh == NULL) {
-    fprintf(stderr, "could not open %s", filename);
-    exit(EXIT_FAILURE);
-  }
+	fh = gzopen(filename, "r");
+	if(fh == NULL) {
+		fprintf(stderr, "could not open %s", filename);
+		exit(EXIT_FAILURE);
+	}
 
 	line = malloc(1024 * sizeof(char));
 	check_malloc(line, NULL);
@@ -150,18 +150,18 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 	width = pow_four(kmer);
 
 	// allocate a +1 size for the extra row
-  matrix = malloc(sequences * (width) * sizeof(double));
+	matrix = malloc(sequences * (width) * sizeof(double));
 	check_malloc(matrix, NULL);
 
 	row = malloc((width) * sizeof(unsigned long long));
 	check_malloc(row, NULL);
 	
-  headers = malloc(sequences * sizeof(char *));
+	headers = malloc(sequences * sizeof(char *));
 	check_malloc(headers, NULL);
 
 	for(i = 0; i < sequences; i++) {
 		unsigned long long j = 0;
-		// get header and add it to headers array 
+		// get header and add it to headers array
 		char *header = malloc(256 * sizeof(char));
 		check_malloc(header, NULL);
 		gzgets(fh, header, 256);
@@ -189,17 +189,16 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 			}
 
 		}
-		for(j = 0; j < width; j++) { 
+		for(j = 0; j < width; j++) {
 			matrix[i*(width) + j] = ((double)row[j]);
 		}
 	}
 
 	// load the matrix of counts
-  gzclose(fh);
+	gzclose(fh);
 
 	free(line);
 	free(row);
-
 	ret = malloc(sizeof(struct matrix));
 	(*ret).kmer = kmer;
 	(*ret).sequences = sequences;
