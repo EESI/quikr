@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 	// copy only kmers from our original counts that match our rareness percentage
 	// in both our count matrix and our sensing matrix
 	for(x = 0, y = 1;  x < width; x++) {
-		if(count_matrix[x] < rare_value) {
+		if(count_matrix[x] <= rare_value) {
 			count_matrix_rare[y] = count_matrix[x];
 
 			for(z = 0; z < sensing_matrix->sequences; z++) 
