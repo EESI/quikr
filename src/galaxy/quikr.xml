@@ -1,0 +1,33 @@
+<tool id="quikr" name="Quikr">
+	<description>Classify with Quikr</description>
+	<command>quikr -v -k $kmer -s $db -i $input -o $output</command>
+	<inputs>
+		<param name="input" type="data" format="fasta" label="input fasta"/>
+		<param name="db" type="data" format="data" label="trained database"/>
+		<param name="lambda" type="integer" size="6" value="10000" label="lambda" help="default 10000"/>
+		<param name="kmer" type="integer" size="2" value="6" label="What mer size to use?" help="range 6 - 12"/>
+	</inputs>
+	<outputs>
+		<data name="output" format="tabular"/>
+	</outputs>
+	<help>
+**What it does**
+
+This tool counts the length of each fasta sequence in the file. The output file has two columns per line (separated by tab): fasta titles and lengths of the sequences. The option *How many characters to keep?* allows to select a specified number of letters from the beginning of each FASTA entry. 
+
+-----	
+
+**Example**
+
+Suppose you have the following FASTA formatted sequences from a Roche (454) FLX sequencing run::
+
+    &gt;EYKX4VC02EQLO5 length=108 xy=1826_0455 region=2 run=R_2007_11_07_16_15_57_    TCCGCGCCGAGCATGCCCATCTTGGATTCCGGCGCGATGACCATCGCCCGCTCCACCACG    TTCGGCCGGCCCTTCTCGTCGAGGAATGACACCAGCGCTTCGCCCACG    &gt;EYKX4VC02D4GS2 length=60 xy=1573_3972 region=2 run=R_2007_11_07_16_15_57_    AATAAAACTAAATCAGCAAAGACTGGCAAATACTCACAGGCTTATACAATACAAATGTAAfa
+
+Running this tool while setting **How many characters to keep?** to **14** will produce this::
+	
+	EYKX4VC02EQLO5  108
+	EYKX4VC02D4GS2	 60
+
+
+	</help>
+</tool>
