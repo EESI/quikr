@@ -19,8 +19,6 @@
 #include <sys/sysinfo.h>
 #endif
 
-#define sensing_matrix(i,j) (sensing_matrix[width*i + j])
-#define solutions(i,j) (solutions[sequences*i+ j])
 #define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --input-filelist\n\ta file containing list of fasta files to process seperated by newline (same rules apply as input-directory)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 static int cmp (const void * a, const void * b) {
@@ -353,6 +351,7 @@ int main(int argc, char **argv) {
 		
 		printf("processing %s\n", filenames[i]);
 		file_sequence_count = count_sequences(filenames[i]);
+		printf("%s has %llu sequences\n", filenames[i],  file_sequence_count);
 
 		// load counts matrix
 		double *count_matrix = malloc(width * sizeof(double));
@@ -365,7 +364,8 @@ int main(int argc, char **argv) {
 			unsigned long long *integer_counts = get_kmer_counts_from_file(filenames[i], kmer);
 
 			for(x = 0; x < width; x++) {
-				sorted_count_matrix[x] = count_matrix[x] = (double)integer_counts[x];
+				count_matrix[x] = (double)integer_counts[x];
+				sorted_count_matrix[x] = count_matrix[x];
 			}
 
 			free(integer_counts);
@@ -410,7 +410,7 @@ int main(int argc, char **argv) {
 		// in both our count matrix and our sensing matrix
 		//
 		// y = 1 because we are offsetting the array by 1, so we can set the first row to all 1's
-		for(x = 0, y = 1;  x < width - 1; x++) {
+		for(x = 0, y = 1;  x < width; x++) {
 			if(count_matrix[x] <= rare_value) {
 				count_matrix_rare[y] = count_matrix[x];
 
@@ -420,6 +420,7 @@ int main(int argc, char **argv) {
 				y++;
 			}
 		}
+
 
 		// normalize our kmer counts and our sensing_matrix
 		normalize_matrix(count_matrix_rare, 1, rare_width);
@@ -443,14 +444,10 @@ int main(int argc, char **argv) {
 			sensing_matrix_rare[x*rare_width] = 1.0;
 		}
 
-		size_t zz;
-		for(y = 0; y < sequences; y++) {
-			for(zz = 0; zz < rare_width - 1; zz++)
-				printf("%lf\t", sensing_matrix_rare[rare_width * y + zz]);
-			printf("%lf\n", sensing_matrix_rare[rare_width * y + rare_width - 1]);
-		}
-
 		double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sequences, rare_width);
+
+		// normalize our solution
+		normalize_matrix(solution, 1, sequences);
 
 		// add the current solution to the solutions array
 		for(unsigned long long z = 0; z < sequences; z++ )  {
