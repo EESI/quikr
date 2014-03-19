@@ -19,7 +19,31 @@
 #include <sys/sysinfo.h>
 #endif
 
-#define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --input-filelist\n\ta file containing list of fasta files to process seperated by newline (same rules apply as input-directory)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
+void usage() {
+
+	printf("Usage: multifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\n"
+				 "Options:\n\n"
+				 "-i, --input-directory\n"
+				 "  the directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n"
+				 "-f,--input-filelist\n"
+				 "  a file containing list of fasta files to process seperated by newline (same rules apply as input-directory)\n\n"
+				 "-s, --sensing-matrix\n"
+				 "  location of the sensing matrix. (sensing from quikr_train)\n\n"
+				 "-k,--kmer\n"
+				 "  specify what size of kmer to use. (default value is 6)\n\n"
+				 "-l,--lambda\n"
+				 "  lambda value to use. (default value is 10000)\n\n"
+				 "-r,--rare-percent\n"
+				 "  remove mers from classification if their values are less than the x percentile of values in the sample (default value is 10000)\n\n"
+				 "-j, --jobs\n"
+				 "  specifies how many jobs to run at once. (default value is the number of CPUs)\n\n"
+				 "-o, --output\n"
+				 "  the OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n"
+				 "-v, --verbose\n"
+				 "  verbose mode.\n\n"
+				 "-V, --version\n"
+				 "  print version.\n");
+}
 
 char **get_fasta_files_from_file(char *fn) {
 	char **files;
@@ -233,7 +257,7 @@ int main(int argc, char **argv) {
 				exit(EXIT_SUCCESS);
 				break;
 			case 'h':
-				puts(USAGE);
+				usage();
 				exit(EXIT_SUCCESS);
 				break;
 			default:
@@ -243,26 +267,26 @@ int main(int argc, char **argv) {
 
 	if(sensing_matrix_filename == NULL) {
 		fprintf(stderr, "Error: sensing matrix filename (-s) must be specified\n\n");
-		fprintf(stderr, "%s\n", USAGE);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
 	if(output_filename == NULL) {
 		fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
-		fprintf(stderr, "%s\n", USAGE);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
  	// input fasta parsing
 	if(input_fasta_directory == NULL && input_fasta_filelist == NULL) {
 		fprintf(stderr, "Error: input fasta directory (-i) or input fasta filelist (-f) must be specified\n\n");
-		fprintf(stderr, "%s\n", USAGE);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
 	if(input_fasta_directory != NULL && input_fasta_filelist != NULL) {
 		fprintf(stderr, "Error: input fasta directory (-i) and input fasta filelist (-f) cannot be used concurrently\n\n");
-		fprintf(stderr, "%s\n", USAGE);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
@@ -273,6 +297,7 @@ int main(int argc, char **argv) {
 
 	if(verbose) {
 		printf("kmer: %u\n", kmer);
+		printf("rare: %lf\n", rare_percent);
 		printf("lambda: %llu\n", lambda);
 		printf("input directory: %s\n", input_fasta_directory);
 		printf("input filelist: %s\n", input_fasta_filelist);
@@ -343,8 +368,6 @@ int main(int argc, char **argv) {
 		unsigned long long rare_value = 0;
 		unsigned long long rare_width = 0;
 
-		double rare_percent = 1.0;
-		
 		printf("processing %s\n", filenames[i]);
 		file_sequence_count = count_sequences(filenames[i]);
 		printf("%s has %llu sequences\n", filenames[i],  file_sequence_count);

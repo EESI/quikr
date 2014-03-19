@@ -13,6 +13,8 @@ multifasta_to_otu \- create a QIIME OTU table based on Quikr results.
 .IR kmer ]
 .RB [ \-l
 .IR lambda ]
+.RB [ \-r
+.IR rare-percent ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-o
@@ -42,6 +44,9 @@ specify what size of kmer to use. (default value is 6)
 .TP
 .B \-l, --lambda
 lambda value to use. (default value is 10000)
+.TP
+.B \-r, --rare-percent
+remove mers from classification if their values are less than the x percentile of values in the sample (default value is 10000)
 .TP
 .B \-j, --jobs
 specifies how many jobs to run at once. (default value is the number of CPUs)
