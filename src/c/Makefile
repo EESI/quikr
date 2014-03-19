@@ -2,7 +2,7 @@ VERSION=\"v1.0.4\"
 UNAME := $(shell uname)
 PWD = $(shell pwd)
 CC = gcc
-MULTIFASTA_CFLAGS = -pthread -L../ -I../ -std=gnu99 -fopenmp
+MULTIFASTA_CFLAGS = -pthread -L../ -I../ -std=gnu99 -fopenmp -DOMP=1
 CFLAGS = -Wall -Wextra -lm -lz  -D$(UNAME) -DVERSION=$(VERSION) 
 
 
