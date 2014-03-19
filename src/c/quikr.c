@@ -197,26 +197,24 @@ int main(int argc, char **argv) {
 
 
 	// normalize our kmer counts and our sensing_matrix
-	normalize_matrix(count_matrix_rare, 1, rare_width);
 	normalize_matrix(sensing_matrix_rare, sensing_matrix->sequences, rare_width);
+	normalize_matrix(count_matrix_rare, 1, rare_width);
 
 	// multiply our kmer counts and sensing matrix by lambda
-	for(x = 1; x < rare_width; x++)
-		count_matrix_rare[x] *= lambda;
-
-	//TODO use one loop
 	for(x = 0; x < sensing_matrix->sequences; x++) {
 		for(y = 1; y < rare_width; y++) {
 			sensing_matrix_rare[rare_width*x + y] *= lambda;
 		}
 	}
 
-	// count_matrix's first element should be zero
-	count_matrix_rare[0] = 0;
-	// stack one's on our first row of our sensing matrix
 	for(x = 0; x < sensing_matrix->sequences; x++) {
 		sensing_matrix_rare[x*rare_width] = 1.0;
 	}
+
+	// count_matrix's first element should be zero
+	count_matrix_rare[0] = 0;
+	for(x = 1; x < rare_width; x++)
+		count_matrix_rare[x] *= lambda;
 
 	double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sensing_matrix->sequences, rare_width);
 
