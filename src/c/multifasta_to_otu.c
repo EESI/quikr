@@ -21,10 +21,6 @@
 
 #define USAGE "Usage:\n\tmultifasta_to_otu [OPTION...] - create a QIIME OTU table based on Quikr results. \n\nOptions:\n\n-i, --input-directory\n\tthe directory containing the samples' fasta files of reads (note each file should correspond to a separate sample)\n\n-f, --input-filelist\n\ta file containing list of fasta files to process seperated by newline (same rules apply as input-directory)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (sensing from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-j, --jobs\n\t specifies how many jobs to run at once. (default value is the number of CPUs)\n\n-o, --output\n\tthe OTU table, with NUM_READS_PRESENT for each sample which is compatible with QIIME's convert_biom.py (or a sequence table if not OTU's)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
-static int cmp (const void * a, const void * b) {
-	return ( *(double*)a - *(double*)b );
-}
-
 char **get_fasta_files_from_file(char *fn) {
 	char **files;
 	int files_count = 0;
@@ -336,7 +332,7 @@ int main(int argc, char **argv) {
 
 		printf("Beginning to process samples\n");
 
-	#pragma omp parallel for shared(solutions, sensing_matrix_ptr, width, done, sequences)
+	#pragma omp parallel for shared(solutions, sensing_matrix_ptr, done)
 	for(size_t i = 0; i < dir_count; i++ ) {
 
 		size_t x = 0;
@@ -356,8 +352,6 @@ int main(int argc, char **argv) {
 		// load counts matrix
 		double *count_matrix = malloc(width * sizeof(double));
 		check_malloc(count_matrix, NULL);
-		double *sorted_count_matrix = malloc(width * sizeof(double));
-		check_malloc(sorted_count_matrix, NULL);
 
 		// convert our matrix into  doubles
 		{
@@ -365,33 +359,13 @@ int main(int argc, char **argv) {
 
 			for(x = 0; x < width; x++) {
 				count_matrix[x] = (double)integer_counts[x];
-				sorted_count_matrix[x] = count_matrix[x];
 			}
 
 			free(integer_counts);
 		}
 
-		// sort our array
-		qsort(sorted_count_matrix, width, sizeof(double), cmp);
-
-		// get our "rare" counts
-		for(y = 0; y < width; y++) {
-			double percentage = 0;
-
-			rare_value = sorted_count_matrix[y];
-			rare_width = 0;
-			for(x = 0; x < width; x++) {
-				if(count_matrix[x] <= rare_value) {
-					rare_width++;
-				}
-			}
-			percentage = (double)rare_width / (double)width;
-
-			if(percentage >= rare_percent)
-				break;
-		}
-		
-		free(sorted_count_matrix);
+		// get_rare_value
+		get_rare_value(count_matrix, width, rare_percent, &rare_value, &rare_width);
 
 		if(verbose)
 			printf("there are %llu values less than %llu\n", rare_width, rare_value);

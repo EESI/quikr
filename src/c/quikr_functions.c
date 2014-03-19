@@ -10,6 +10,7 @@
 #include "kmer_utils.h"
 #include "quikr.h"
 
+
 void check_malloc(void *ptr, char *error) {
 	if (ptr == NULL) {
 		if(error != NULL)  {
@@ -19,6 +20,44 @@ void check_malloc(void *ptr, char *error) {
 		}
 		exit(EXIT_FAILURE);
 	}
+}
+static int double_cmp (const void * a, const void * b) {
+	return ( *(double*)a - *(double*)b );
+}
+
+void get_rare_value(double *count_matrix, unsigned long long width, double rare_percent, unsigned long long *ret_rare_value, unsigned long long  *ret_rare_width) { 
+	size_t y, x;
+	unsigned long long rare_width = 0;
+	double rare_value = 0;
+
+	// allocate * sort a temporary matrix
+	double *sorted_count_matrix = malloc(width * sizeof(double));
+	check_malloc(sorted_count_matrix, NULL);
+
+	memcpy(sorted_count_matrix, count_matrix, width * sizeof(double));
+
+	qsort(sorted_count_matrix, width, sizeof(double), double_cmp);
+
+	// get our "rare" counts
+	for(y = 0; y < width; y++) {
+		double percentage = 0;
+
+		rare_value = sorted_count_matrix[y];
+		rare_width = 0;
+		for(x = 0; x < width; x++) {
+			if(count_matrix[x] <= rare_value) {
+				rare_width++;
+			}
+		}
+		percentage = (double)rare_width / (double)width;
+
+		if(percentage >= rare_percent)
+			break;
+	}
+
+	free(sorted_count_matrix);
+	*ret_rare_width = rare_width;
+	*ret_rare_value = rare_value;
 }
 
 void debug_arrays(double *count_matrix, struct matrix *sensing_matrix) {

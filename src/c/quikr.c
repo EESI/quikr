@@ -11,7 +11,6 @@
 #include "quikr_functions.h"
 #include "quikr.h"
 
-#define sensing_matrix(i,j) (sensing_matrix[width*i + j])
 #define USAGE "Usage:\n\tquikr [OPTION...] - Calculate estimated frequencies of bacteria in a sample.\n\nOptions:\n\n-i, --input\n\tthe sample's fasta file of NGS READS (fasta format)\n\n-s, --sensing-matrix\n\t location of the sensing matrix. (trained from quikr_train)\n\n-k, --kmer\n\tspecify what size of kmer to use. (default value is 6)\n\n-l, --lambda\n\tlambda value to use. (default value is 10000)\n\n-o, --output\n\tOTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)\n\n-v, --verbose\n\tverbose mode.\n\n-V, --version\n\tprint version."
 
 int main(int argc, char **argv) {
@@ -29,7 +28,6 @@ int main(int argc, char **argv) {
 	unsigned long long rare_value = 0;
 	unsigned long long rare_width = 0;
 
-	double percentage = 1.0;
 	double rare_percent = 1.0;
 
 	unsigned long long width = 0;
@@ -116,7 +114,6 @@ int main(int argc, char **argv) {
 	}
 
 	if(verbose) {
-		printf("rare width:%llu\n", rare_width);
 		printf("kmer: %u\n", kmer);
 		printf("lambda: %llu\n", lambda);
 		printf("fasta: %s\n", input_fasta_filename);
@@ -142,53 +139,51 @@ int main(int argc, char **argv) {
 	// 4 "ACGT" ^ Kmer gives us the size of output rows
 	width = pow_four(kmer);
 
+	// load sensing matrix
+	struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
+
+	if(verbose) {
+		printf("width: %llu\n", width);
+		printf("sequences: %llu\n", sensing_matrix->sequences);
+	}
+
+
+
 	// load counts matrix
 	double *count_matrix = malloc(width * sizeof(double));
 	check_malloc(count_matrix, NULL);
 
+	// convert our matrix into doubles
 	{
 		unsigned long long *integer_counts = get_kmer_counts_from_file(input_fasta_filename, kmer);
 
-		for(x = 0; x < width; x++)
+		for(x = 0; x < width; x++) {
 			count_matrix[x] = (double)integer_counts[x];
+		}
 
 		free(integer_counts);
 	}
 
-	// load sensing matrix
-	struct matrix *sensing_matrix = load_sensing_matrix(sensing_matrix_filename, kmer);
-
-	// get our "rare" counts
-	while(1) {
-		rare_width = 0;
-		for(x = 0; x < width; x++) {
-			if(count_matrix[x] < rare_value) {
-				rare_width++;
-			}
-		}
-		percentage = (float)rare_width / (float)width;
-
-		if(percentage >= rare_percent)
-			break;
-
-		rare_value++;
-	}
+	// get_rare_value
+	get_rare_value(count_matrix, width, rare_percent, &rare_value, &rare_width);
 
 	if(verbose)
 		printf("there are %llu values less than %llu\n", rare_width, rare_value);
 
-	// add a extra space for our zero's array
+	// add a extra space for our zero's array, so we can set the first column to 1's
 	rare_width++;
 
 	// store our count matrix
 	double *count_matrix_rare = calloc(rare_width, sizeof(double));
 	check_malloc(count_matrix_rare, NULL);
 
-	double *sensing_matrix_rare = malloc((rare_width) * sensing_matrix->sequences * sizeof(double));
+	double *sensing_matrix_rare = calloc(rare_width * sensing_matrix->sequences, sizeof(double));
 	check_malloc(sensing_matrix_rare, NULL);
 
 	// copy only kmers from our original counts that match our rareness percentage
 	// in both our count matrix and our sensing matrix
+	//
+	// y = 1 because we are offsetting the arrah by 1, so we can set the first row to all 1's
 	for(x = 0, y = 1;  x < width; x++) {
 		if(count_matrix[x] <= rare_value) {
 			count_matrix_rare[y] = count_matrix[x];
@@ -200,6 +195,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
+
 	// normalize our kmer counts and our sensing_matrix
 	normalize_matrix(count_matrix_rare, 1, rare_width);
 	normalize_matrix(sensing_matrix_rare, sensing_matrix->sequences, rare_width);
@@ -208,6 +204,7 @@ int main(int argc, char **argv) {
 	for(x = 1; x < rare_width; x++)
 		count_matrix_rare[x] *= lambda;
 
+	//TODO use one loop
 	for(x = 0; x < sensing_matrix->sequences; x++) {
 		for(y = 1; y < rare_width; y++) {
 			sensing_matrix_rare[rare_width*x + y] *= lambda;
@@ -221,7 +218,6 @@ int main(int argc, char **argv) {
 		sensing_matrix_rare[x*rare_width] = 1.0;
 	}
 
-	// run NNLS
 	double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sensing_matrix->sequences, rare_width);
 
 	// normalize our solution vector
