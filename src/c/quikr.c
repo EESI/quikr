@@ -16,131 +16,131 @@
 
 int main(int argc, char **argv) {
 
-  int c;
+	int c;
 
-  char *input_fasta_filename = NULL;
-  char *sensing_matrix_filename = NULL;
-  char *output_filename = NULL;
+	char *input_fasta_filename = NULL;
+	char *sensing_matrix_filename = NULL;
+	char *output_filename = NULL;
 
-  unsigned long long x = 0;
-  unsigned long long y = 0;
-  unsigned long long z = 0;
+	unsigned long long x = 0;
+	unsigned long long y = 0;
+	unsigned long long z = 0;
 
-  unsigned long long rare_value = 0;
-  unsigned long long rare_width = 0; 
+	unsigned long long rare_value = 0;
+	unsigned long long rare_width = 0;
 
-  double percentage = 1.0;
-  double rare_percent = 1.0;
+	double percentage = 1.0;
+	double rare_percent = 1.0;
 
-  unsigned long long width = 0;
+	unsigned long long width = 0;
 
-  unsigned int kmer = 6;
-  unsigned long long lambda = 10000;
+	unsigned int kmer = 6;
+	unsigned long long lambda = 10000;
 
-  int verbose = 0;
+	int verbose = 0;
 
-  while (1) {
-    static struct option long_options[] = {
-      {"input", required_argument, 0, 'i'},
-      {"kmer",  required_argument, 0, 'k'},
-      {"lambda",  required_argument, 0, 'l'},
-      {"output", required_argument, 0, 'o'},
-      {"sensing-matrix", required_argument, 0, 's'},
-      {"rare-percent", required_argument, 0, 'r'},
-      {"verbose", no_argument, 0, 'v'},
-      {"version", no_argument, 0, 'V'},
-      {"help", no_argument, 0, 'h'},
-      {"debug", no_argument, 0, 'd'},
-      {0, 0, 0, 0}
-    };
+	while (1) {
+		static struct option long_options[] = {
+			{"input", required_argument, 0, 'i'},
+			{"kmer",  required_argument, 0, 'k'},
+			{"lambda",  required_argument, 0, 'l'},
+			{"output", required_argument, 0, 'o'},
+			{"sensing-matrix", required_argument, 0, 's'},
+			{"rare-percent", required_argument, 0, 'r'},
+			{"verbose", no_argument, 0, 'v'},
+			{"version", no_argument, 0, 'V'},
+			{"help", no_argument, 0, 'h'},
+			{"debug", no_argument, 0, 'd'},
+			{0, 0, 0, 0}
+		};
 
-    int option_index = 0;
+		int option_index = 0;
 
-    c = getopt_long (argc, argv, "k:l:s:r:i:o:r:hdvV", long_options, &option_index);
+		c = getopt_long (argc, argv, "k:l:s:r:i:o:r:hdvV", long_options, &option_index);
 
-    if (c == -1)
-      break;
+		if (c == -1)
+			break;
 
-    switch (c) {
-      case 'k':
-        kmer = atoi(optarg);
-        break;
-      case 'l':
-        lambda = atoi(optarg);
-        break;
-      case 'r':
-        rare_percent = atof(optarg);
-        break;
-      case 's':
-        sensing_matrix_filename = optarg;
-        break;
-      case 'i':
-        input_fasta_filename = optarg;
-        break;
-      case 'o':
-        output_filename = optarg;
-        break;
-      case 'v':
-        verbose = 1;
-        break;
-      case 'V':
-        printf("%s\n", VERSION);
-        exit(EXIT_SUCCESS);
-      case 'h':
-        printf("%s\n", USAGE);
-        exit(EXIT_SUCCESS);
-      default:
-        break;
-    }
-  }
+		switch (c) {
+			case 'k':
+				kmer = atoi(optarg);
+				break;
+			case 'l':
+				lambda = atoi(optarg);
+				break;
+			case 'r':
+				rare_percent = atof(optarg);
+				break;
+			case 's':
+				sensing_matrix_filename = optarg;
+				break;
+			case 'i':
+				input_fasta_filename = optarg;
+				break;
+			case 'o':
+				output_filename = optarg;
+				break;
+			case 'v':
+				verbose = 1;
+				break;
+			case 'V':
+				printf("%s\n", VERSION);
+				exit(EXIT_SUCCESS);
+			case 'h':
+				printf("%s\n", USAGE);
+				exit(EXIT_SUCCESS);
+			default:
+				break;
+		}
+	}
 
-  if(sensing_matrix_filename == NULL) {
-    fprintf(stderr, "Error: sensing matrix filename (-s) must be specified\n\n");
-    fprintf(stderr, "%s\n", USAGE);
-    exit(EXIT_FAILURE);
-  }
-  if(output_filename == NULL) {
-    fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
-    fprintf(stderr, "%s\n", USAGE);
-    exit(EXIT_FAILURE);
-  }
-  if(input_fasta_filename == NULL) {
-    fprintf(stderr, "Error: input fasta file (-i) must be specified\n\n");
-    fprintf(stderr, "%s\n", USAGE);
-    exit(EXIT_FAILURE);
-  }
+	if(sensing_matrix_filename == NULL) {
+		fprintf(stderr, "Error: sensing matrix filename (-s) must be specified\n\n");
+		fprintf(stderr, "%s\n", USAGE);
+		exit(EXIT_FAILURE);
+	}
+	if(output_filename == NULL) {
+		fprintf(stderr, "Error: output filename (-o) must be specified\n\n");
+		fprintf(stderr, "%s\n", USAGE);
+		exit(EXIT_FAILURE);
+	}
+	if(input_fasta_filename == NULL) {
+		fprintf(stderr, "Error: input fasta file (-i) must be specified\n\n");
+		fprintf(stderr, "%s\n", USAGE);
+		exit(EXIT_FAILURE);
+	}
 
 	if(rare_percent <= 0 || rare_percent > 1.0) {
-    fprintf(stderr, "Error: rare percent must be between 0 and 1\n");
-    exit(EXIT_FAILURE);
+		fprintf(stderr, "Error: rare percent must be between 0 and 1\n");
+		exit(EXIT_FAILURE);
 	}
 
-  if(verbose) {
-    printf("rare width:%llu\n", rare_width);
-    printf("kmer: %u\n", kmer);
-    printf("lambda: %llu\n", lambda);
-    printf("fasta: %s\n", input_fasta_filename);
-    printf("sensing matrix: %s\n", sensing_matrix_filename);
-    printf("output: %s\n", output_filename);
-  }
+	if(verbose) {
+		printf("rare width:%llu\n", rare_width);
+		printf("kmer: %u\n", kmer);
+		printf("lambda: %llu\n", lambda);
+		printf("fasta: %s\n", input_fasta_filename);
+		printf("sensing matrix: %s\n", sensing_matrix_filename);
+		printf("output: %s\n", output_filename);
+	}
 
-  if(access (sensing_matrix_filename, F_OK) == -1) {
-    fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
-    exit(EXIT_FAILURE);
-  }
-  if(access (input_fasta_filename, F_OK) == -1) {
-    fprintf(stderr, "Error: could not find %s\n", input_fasta_filename);
-    exit(EXIT_FAILURE);
-  }
+	if(access (sensing_matrix_filename, F_OK) == -1) {
+		fprintf(stderr, "Error: could not find %s\n", sensing_matrix_filename);
+		exit(EXIT_FAILURE);
+	}
+	if(access (input_fasta_filename, F_OK) == -1) {
+		fprintf(stderr, "Error: could not find %s\n", input_fasta_filename);
+		exit(EXIT_FAILURE);
+	}
 
 	if(kmer == 0) {
-    fprintf(stderr, "Error: zero is not a valid kmer\n");
-    exit(EXIT_FAILURE);
+		fprintf(stderr, "Error: zero is not a valid kmer\n");
+		exit(EXIT_FAILURE);
 	}
 
 
-  // 4 "ACGT" ^ Kmer gives us the size of output rows
-  width = pow_four(kmer);
+	// 4 "ACGT" ^ Kmer gives us the size of output rows
+	width = pow_four(kmer);
 
 	// load counts matrix
 	double *count_matrix = malloc(width * sizeof(double));
@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
 		if(count_matrix[x] <= rare_value) {
 			count_matrix_rare[y] = count_matrix[x];
 
-			for(z = 0; z < sensing_matrix->sequences; z++) 
+			for(z = 0; z < sensing_matrix->sequences; z++)
 				sensing_matrix_rare[z*rare_width + y] = sensing_matrix->matrix[z*width + x];
 
 			y++;
@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
 	normalize_matrix(sensing_matrix_rare, sensing_matrix->sequences, rare_width);
 
 	// multiply our kmer counts and sensing matrix by lambda
-	for(x = 1; x < rare_width; x++) 
+	for(x = 1; x < rare_width; x++)
 		count_matrix_rare[x] *= lambda;
 
 	for(x = 0; x < sensing_matrix->sequences; x++) {
@@ -222,22 +222,22 @@ int main(int argc, char **argv) {
 	}
 
 	// run NNLS
-  double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sensing_matrix->sequences, rare_width);
+	double *solution = nnls(sensing_matrix_rare, count_matrix_rare, sensing_matrix->sequences, rare_width);
 
-  // normalize our solution vector
-  normalize_matrix(solution, 1, sensing_matrix->sequences);
+	// normalize our solution vector
+	normalize_matrix(solution, 1, sensing_matrix->sequences);
 
-  // output our matrix
-  FILE *output_fh = fopen(output_filename, "w");
-  if(output_fh == NULL) { 
-    fprintf(stderr, "Could not open %s for writing\n", output_filename);
-    exit(EXIT_FAILURE);
-  }
+	// output our matrix
+	FILE *output_fh = fopen(output_filename, "w");
+	if(output_fh == NULL) {
+		fprintf(stderr, "Could not open %s for writing\n", output_filename);
+		exit(EXIT_FAILURE);
+	}
 
-  for(x = 0; x < sensing_matrix->sequences; x++)
-      fprintf(output_fh, "%.10lf\n", solution[x]);
+	for(x = 0; x < sensing_matrix->sequences; x++)
+		fprintf(output_fh, "%.10lf\n", solution[x]);
 
-  fclose(output_fh);
+	fclose(output_fh);
 
 	free(solution);
 
@@ -247,5 +247,5 @@ int main(int argc, char **argv) {
 	free(count_matrix_rare);
 	free(sensing_matrix_rare);
 
-  return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

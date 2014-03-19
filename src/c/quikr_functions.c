@@ -205,5 +205,5 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 	(*ret).matrix = matrix;
 	(*ret).headers = headers;
 
-  return ret;
+	return ret;
 }
