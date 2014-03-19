@@ -1,0 +1,19 @@
+<tool id="multifasta" name="Multifasta">
+	<description>Get Abundances on Multiple Files</description>
+	<command interpreter="bash">multifasta_to_otu -k $kmer -s $db -f &lt;( echo
+#for $input in $inputs:
+"${input}"
+#end for
+ | xargs -n 1	) -o $output</command>
+	<inputs>
+		<param name="inputs" multiple="true" type="data" format="fasta" label="input fasta"/>
+		<param name="db" type="data" format="data" label="trained database"/>
+		<param name="lambda" type="integer" size="6" value="10000" label="lambda" help="default 10000"/>
+		<param name="kmer" type="integer" size="2" value="6" label="What mer size to use?" help="range 6 - 12"/>
+	</inputs>
+	<outputs>
+		<data name="output" format="tabular"/>
+	</outputs>
+	<help>
+	</help>
+</tool>
