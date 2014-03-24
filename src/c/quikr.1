@@ -36,6 +36,9 @@ specify what size of kmer to use. (default value is 6)
 .B \-l, --lambda
 lambda value to use. (default value is 10000)
 .TP
+.B \-r, --rare-percent
+remove mers from classification if their values are less than the x percentile of values in the sample (default value is 10000)
+.TP
 .B \-o, --output
 OTU_FRACTION_PRESENT a vector representing the percentage of database sequence's presence in sample. (csv output)
 .TP
@@ -52,7 +55,7 @@ quikr -i sample.fa -s rdp_sensing_matrix.gz -o frequencies.txt
 \fBmultifasta_to_otu\fP(1), \fBquikr_train\fP(1).
 .SH AUTHORS
 .B quikr
-was written by Gail Rosen <gailr@ece.drexel.edu>, Calvin Morrison 
+was written by Gail Rosen <gailr@ece.drexel.edu>, Calvin Morrison
 <mutantturkey@gmail.com>, David Koslicki, Simon Foucart, and Jean-Luc Bouchot.
 .SH REPORTING BUGS
 .TP

@@ -1,3 +1,5 @@
+*The python version is outdated. do not use! It is only here for historical purposes!*
+
 # Python Documentation #
 The python version comes with scripts that can be used like the regular quikr
 program, and also a module called quikr so integration with python scripts 
@@ -12,6 +14,7 @@ If you want to use our quikr module, run help on the module:
 
     >>> import quikr
     >>> help(quikr)
+
 ## Python Cannot Find XYZ ##
 
 Ensure that you have Python 2.7, Scipy, Numpy, and BIOpython installed 

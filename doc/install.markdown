@@ -5,23 +5,24 @@ To use Quikr there are several prerequisites.
 + Mac OS X 10.6.8 or GNU/Linux
 + 4Gb of RAM minimum. Absolutely neccessary.
 + gcc that supports OpenMP
-+ mlton the Standard-ML compiler
 
 ### Python Requirements ###
+*the python version is out of date*
 + Python 2.7+ 
 + Scipy 
 + Numpy
 + BioPython
 
+### Matlab Requrements ###
++ [dna\_utils](http://github.com/EESI/dna-utils/) must be installed
+
 ### Mac Requirements ###
 + Mac OS X 10.6.8 (what we have tested)
 + GCC 4.7 or newer. (gcc 4.2 did not work, and is the default installation)
-+ mlton the Standard-ML compiler
 + OpenMP libraries (libgomp, usually comes with gcc)
 
 ### Linux Requirements ###
 + GCC 4.7 or newer
-+ OCaml compiler mlton
 + OpenMP libraries (libgomp, usually comes with gcc)
 
 We also have a Quikr implementation in Matlab so that you can easily integrate

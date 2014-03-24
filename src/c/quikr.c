@@ -115,6 +115,7 @@ int main(int argc, char **argv) {
 
 	if(verbose) {
 		printf("kmer: %u\n", kmer);
+		printf("rare: %lf\n", rare_percent);
 		printf("lambda: %llu\n", lambda);
 		printf("fasta: %s\n", input_fasta_filename);
 		printf("sensing matrix: %s\n", sensing_matrix_filename);
