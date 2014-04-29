@@ -16,8 +16,8 @@ all: nnls.o kmer_utils.o quikr_functions.o quikr_train quikr multifasta_to_otu t
 
 nnls.o: nnls.c
 	$(CC) -c nnls.c -o nnls.o  $(CFLAGS)
-kmer_utils.o: kmer_utils.c 
-	$(CC) -c kmer_utils.c -o kmer_utils.o  $(CFLAGS)
+kmer_utils.o: kmer_utils.c  quikr_functions.o
+	$(CC) -c kmer_utils.c  quikr_functions.o -o kmer_utils.o  $(CFLAGS)
 quikr_functions.o: quikr_functions.c 
 	$(CC) -c quikr_functions.c -o quikr_functions.o  $(CFLAGS)
 multifasta_to_otu: kmer_utils.o nnls.o quikr_functions.o multifasta_to_otu.c

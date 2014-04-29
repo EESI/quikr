@@ -95,7 +95,7 @@ unsigned long long * get_kmer_counts_from_file(const char *fn, const unsigned in
 
 	unsigned long long str_size = 4096;
 
-	while ((read = getdelim(&line, &len, '>', fh)) != -1) {
+	while ((read = getseq(&line, &len, fh)) != -1) {
 
 		// find our first \n, this should be the end of the header
 		char *start = strchr(line, '\n');	

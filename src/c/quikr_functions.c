@@ -6,10 +6,107 @@
 #include <string.h>
 #include <unistd.h>
 #include <zlib.h>
+#include <assert.h>
 
 #include "kmer_utils.h"
 #include "quikr.h"
 
+
+/* getdelim.c --- Implementation of replacement getdelim function.
+	 Copyright (C) 1994, 1996, 1997, 1998, 2001, 2003, 2005 Free
+	 Software Foundation, Inc.
+
+	 This program is free software; you can redistribute it and/or
+	 modify it under the terms of the GNU General Public License as
+	 published by the Free Software Foundation; either version 2, or (at
+	 your option) any later version.
+
+	 This program is distributed in the hope that it will be useful, but
+	 WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	 General Public License for more details.
+
+	 You should have received a copy of the GNU General Public License
+	 along with this program; if not, write to the Free Software
+	 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+	 02110-1301, USA.  */
+
+ssize_t getseq(char **lineptr, size_t *n, FILE *fp) {
+	int result = 0;
+	ssize_t cur_len = 0;
+	ssize_t len;
+
+	if (lineptr == NULL || n == NULL || fp == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+
+	flockfile (fp);
+
+	if (*lineptr == NULL || *n == 0)
+	{
+		*n = 120;
+		*lineptr = (char *) malloc (*n);
+		if (*lineptr == NULL)
+		{
+			result = -1;
+			goto unlock_return;
+		}
+	}
+
+		int newline = 0;
+	for (;;) {
+		char *t;
+		int i;
+
+		i = getc (fp);
+		if (i == EOF)
+		{
+			result = -1;
+			break;
+		}
+
+		/* Make enough space for len+1 (for final NUL) bytes.  */
+		if (cur_len + 2 >= *n)
+		{
+			size_t needed = 2 * (cur_len + 1) + 2;   /* Be generous. */
+			char *new_lineptr;
+
+			if (needed < cur_len)
+			{
+				result = -1;
+				goto unlock_return;
+			}
+
+			new_lineptr = (char *) realloc (*lineptr, needed);
+			if (new_lineptr == NULL){
+				result = -1;
+				goto unlock_return;
+			}
+
+			*lineptr = new_lineptr;
+			*n = needed;
+		}
+
+		(*lineptr)[cur_len] = i;
+		cur_len++;
+
+		if (i == '\n') {
+			newline = 1;
+		}
+
+		if(i == '>' && newline == 1) {
+			break;
+		}
+	}
+	(*lineptr)[cur_len] = '\0';
+	result = cur_len ? cur_len : result;
+
+	unlock_return:
+		funlockfile (fp);
+		return result;
+}
 
 void check_malloc(void *ptr, char *error) {
 	if (ptr == NULL) {
@@ -124,6 +221,42 @@ unsigned long long count_sequences(const char *filename) {
 }
 
 
+/*
+ * * Sally - A Tool for Embedding Strings in Vector Spaces
+ * * Copyright (C) 2010 Konrad Rieck (konrad@mlsec.org)
+ * * --
+ * * This program is free software; you can redistribute it and/or modify it
+ * * under the terms of the GNU General Public License as published by the
+ * * Free Software Foundation; either version 3 of the License, or (at your
+ * * option) any later version. This program is distributed without any
+ * * warranty. See the GNU General Public License for more details.
+ * */
+size_t gzgetline(char **s, size_t * n, gzFile f) {
+	assert(f);
+	int c = 0;
+	*n = 0;
+
+	if (gzeof(f))
+		return -1;
+
+	while (c != '\n') {
+		if (!*s || *n % 256 == 0) {
+			*s = realloc(*s, *n + 256 + 1);
+			if (!*s)
+				return -1;
+		}
+
+		c = gzgetc(f);
+		if (c == -1)
+			return -1;
+
+		(*s)[(*n)++] = c;
+	}
+
+	(*s)[*n] = 0;
+	return *n;
+}
+
 struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kmer) {
 
 	char *line = NULL;
@@ -139,6 +272,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 	unsigned long long width = 0;
 
 	struct matrix *ret = NULL;
+	size_t lineno = 0;
 
 	gzFile fh = NULL;
 
@@ -153,6 +287,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 
 	// Check for quikr
 	line = gzgets(fh, line, 1024);
+	lineno++;
 	if(strcmp(line, "quikr\n") != 0) {
 		fprintf(stderr, "This does not look like a quikr sensing matrix. Please check your path: %s\n", filename);
 		exit(EXIT_FAILURE);
@@ -164,6 +299,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 		fprintf(stderr, "Sensing Matrix uses an unsupported version, please retrain your matrix\n");
 		exit(EXIT_FAILURE);
 	}
+	lineno++;
 
 	// get number of sequences
 	line = gzgets(fh, line, 1024);
@@ -172,6 +308,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 		fprintf(stderr, "Error parsing sensing matrix, sequence count is zero\n");
 		exit(EXIT_FAILURE);
 	}
+	lineno++;
 
 	// get kmer
 	gzgets(fh, line, 1024);
@@ -180,6 +317,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 		fprintf(stderr, "Error parsing sensing matrix, kmer is zero\n");
 		exit(EXIT_FAILURE);
 	}
+	lineno++;
 
 	if(kmer != target_kmer) {
 		fprintf(stderr, "The sensing_matrix was trained with a different kmer than your requested kmer\n");
@@ -198,18 +336,29 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 	headers = malloc(sequences * sizeof(char *));
 	check_malloc(headers, NULL);
 
+	char *buf = NULL;
+	size_t len = 0;
+	size_t read = 0;
 	for(i = 0; i < sequences; i++) {
 		unsigned long long j = 0;
 		// get header and add it to headers array
-		char *header = malloc(256 * sizeof(char));
-		check_malloc(header, NULL);
-		gzgets(fh, header, 256);
-		if(header[0] != '>') {
+		//
+		read = gzgetline(&buf, &len, fh);
+		if(read == 0)  {
 			fprintf(stderr, "Error parsing sensing matrix, could not read header\n");
 			exit(EXIT_FAILURE);
 		}
 
-		header[strlen(header) - 1] = '\0';
+		char *header = malloc(sizeof(char) * read + 1);
+		check_malloc(header, NULL);	
+		header = strncpy(header, buf, read - 1);
+		if(header[0] != '>') {
+			fprintf(stderr, "Error parsing sensing matrix, could not read header\n");
+			exit(EXIT_FAILURE);
+		}
+		lineno++;
+
+		header[read - 1] = '\0';
 		headers[i] = header+1;
 
 		row = memset(row, 0, (width) * sizeof(unsigned long long));
@@ -217,9 +366,10 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 		for(j = 0; j < width; j++) {
 			line = gzgets(fh, line, 32);
 			if(line == NULL || line[0] == '>') {
-				fprintf(stderr, "Error parsing sensing matrix, line does not look like a value\n");
+				fprintf(stderr, "Error parsing sensing matrix, line %zu does not look like a value\n", lineno);
 				exit(EXIT_FAILURE);
 			}
+			lineno++;
 
 			row[j] = strtoull(line, NULL, 10);
 			if(errno) {
