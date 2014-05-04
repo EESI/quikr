@@ -198,14 +198,16 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 	headers = malloc(sequences * sizeof(char *));
 	check_malloc(headers, NULL);
 
+	unsigned long long lineno = 0;
 	for(i = 0; i < sequences; i++) {
 		unsigned long long j = 0;
 		// get header and add it to headers array
-		char *header = malloc(256 * sizeof(char));
+		char *header = malloc(512 * sizeof(char));
 		check_malloc(header, NULL);
-		gzgets(fh, header, 256);
+		gzgets(fh, header, 512);
+		lineno++;
 		if(header[0] != '>') {
-			fprintf(stderr, "Error parsing sensing matrix, could not read header\n");
+			fprintf(stderr, "Error parsing sensing matrix, could not read header in line %llu\n", lineno);
 			exit(EXIT_FAILURE);
 		}
 
@@ -216,8 +218,9 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 
 		for(j = 0; j < width; j++) {
 			line = gzgets(fh, line, 32);
+			lineno++;
 			if(line == NULL || line[0] == '>') {
-				fprintf(stderr, "Error parsing sensing matrix, line does not look like a value\n");
+				fprintf(stderr, "Error parsing sensing matrix, line does not look like a value in line %llu\n", lineno);
 				exit(EXIT_FAILURE);
 			}
 
