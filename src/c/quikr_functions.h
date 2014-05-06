@@ -12,3 +12,7 @@ struct matrix *load_sensing_matrix(const char *filename, unsigned int target_kme
 
 // get_rare_value 
 void get_rare_value(double *count_matrix, unsigned long long width, double rare_percent, unsigned long long *ret_rare_value, unsigned long long  *ret_rare_width);
+
+
+// getline reimpl
+ssize_t getseq(char **lineptr, size_t *n, FILE *fp);

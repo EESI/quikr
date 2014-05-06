@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
 
 	// seek the first character, and skip over it
 	fseek(input, 1, SEEK_CUR);
-	while ((read = getdelim(&line, &len, '>', input)) != -1) {
+	while ((read = getseq(&line, &len, input)) != -1) {
 
 		// find first whitespace
 		for(i = 0; i < read; i ++) {

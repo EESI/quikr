@@ -33,5 +33,4 @@ install_python:
 clean:
 	@echo "cleaning up"
 	@cd src/python; rm build -Rvf
-	@cd src/nbc; make clean
 	@cd src/c; make clean
