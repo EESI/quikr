@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	unsigned long long position = 0;
 
   int verbose = 0;
-
+  int force_name = 0;
 
   char *fasta_filename = NULL;
   char *output_file = NULL;
@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
   while (1) {
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
+      {"force_name", no_argument, 0, 'f'},
       {"help", no_argument, 0, 'h'},
       {"version", no_argument, 0, 'V'},
       {"input", required_argument, 0, 'i'},
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 
     int option_index = 0;
 
-    c = getopt_long (argc, argv, "i:o:k:hvV", long_options, &option_index);
+    c = getopt_long (argc, argv, "i:o:k:fhvV", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -72,6 +73,9 @@ int main(int argc, char **argv) {
         break;
       case 'v':
         verbose = 1;
+        break;
+      case 'f':
+        force_name = 1;
         break;
       case 'V':
         printf("%s\n", VERSION);
@@ -117,7 +121,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
 	}
 
-  if(strcmp(&output_file[strlen(output_file) - 3], ".gz") != 0) {
+  if(strcmp(&output_file[strlen(output_file) - 3], ".gz") != 0 && !force_name) {
     char *temp = malloc(strlen(output_file) + 4);
     if(temp == NULL) {
       fprintf(stderr, "Could not allocate enough memory\n"); 
