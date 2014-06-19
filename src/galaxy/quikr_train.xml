@@ -9,23 +9,5 @@
 		<data name="output" format="data"/>
 	</outputs>
 	<help>
-**What it does**
-
-This tool counts the length of each fasta sequence in the file. The output file has two columns per line (separated by tab): fasta titles and lengths of the sequences. The option *How many characters to keep?* allows to select a specified number of letters from the beginning of each FASTA entry. 
-
------	
-
-**Example**
-
-Suppose you have the following FASTA formatted sequences from a Roche (454) FLX sequencing run::
-
-    &gt;EYKX4VC02EQLO5 length=108 xy=1826_0455 region=2 run=R_2007_11_07_16_15_57_    TCCGCGCCGAGCATGCCCATCTTGGATTCCGGCGCGATGACCATCGCCCGCTCCACCACG    TTCGGCCGGCCCTTCTCGTCGAGGAATGACACCAGCGCTTCGCCCACG    &gt;EYKX4VC02D4GS2 length=60 xy=1573_3972 region=2 run=R_2007_11_07_16_15_57_    AATAAAACTAAATCAGCAAAGACTGGCAAATACTCACAGGCTTATACAATACAAATGTAAfa
-
-Running this tool while setting **How many characters to keep?** to **14** will produce this::
-	
-	EYKX4VC02EQLO5  108
-	EYKX4VC02D4GS2	 60
-
-
 	</help>
 </tool>
